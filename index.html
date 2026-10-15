@@ -1,0 +1,3034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Break-Even Point Predictor</title>
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & THEME DEFINITIONS
+       ========================================================================== */
+    :root {
+      --bg-body: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-input: #ffffff;
+      --bg-subtle: #f8fafc;
+      --border: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --border-focus: #2563eb;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-subtle: #eff6ff;
+      --primary-border: #bfdbfe;
+
+      --success: #059669;
+      --success-subtle: #ecfdf5;
+      --success-border: #a7f3d0;
+
+      --danger: #dc2626;
+      --danger-subtle: #fef2f2;
+      --danger-border: #fecaca;
+
+      --warning: #d97706;
+      --warning-subtle: #fffbeb;
+      --warning-border: #fde68a;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-full: 9999px;
+
+      /* Chart Colors */
+      --chart-rev: #2563eb;
+      --chart-cost: #ef4444;
+      --chart-fixed: #8b5cf6;
+      --chart-plan: #10b981;
+      --chart-grid: #e2e8f0;
+      --chart-text: #64748b;
+      --chart-profit-zone: rgba(16, 185, 129, 0.16);
+      --chart-loss-zone: rgba(239, 68, 68, 0.16);
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #090d16;
+      --bg-card: #131b2e;
+      --bg-input: #0d1322;
+      --bg-subtle: #19233c;
+      --border: #23304d;
+      --border-hover: #33446b;
+      --border-focus: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-light: #64748b;
+
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-subtle: #1e293b;
+      --primary-border: #1d4ed8;
+
+      --success: #10b981;
+      --success-subtle: #064e3b;
+      --success-border: #047857;
+
+      --danger: #f87171;
+      --danger-subtle: #450a0a;
+      --danger-border: #991b1b;
+
+      --warning: #fbbf24;
+      --warning-subtle: #451a03;
+      --warning-border: #b45309;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+
+      /* Dark Chart Colors */
+      --chart-rev: #60a5fa;
+      --chart-cost: #f87171;
+      --chart-fixed: #a78bfa;
+      --chart-plan: #34d399;
+      --chart-grid: #1e2d4a;
+      --chart-text: #94a3b8;
+      --chart-profit-zone: rgba(52, 211, 153, 0.22);
+      --chart-loss-zone: rgba(248, 113, 113, 0.22);
+    }
+
+    /* ==========================================================================
+       BASE RESETS & TYPOGRAPHY
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.5;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* ==========================================================================
+       LAYOUT & UTILITIES
+       ========================================================================== */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.25rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .flex-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .justify-center {
+      justify-content: center;
+    }
+
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+
+    /* Cards */
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-subtle);
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary-subtle);
+    }
+
+    .btn-sm {
+      padding: 0.35rem 0.65rem;
+      font-size: 0.775rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Form Inputs */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.925rem;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .input-addon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-addon-left {
+      position: absolute;
+      left: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .input-with-addon {
+      padding-left: 2rem;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-primary { background-color: var(--primary-subtle); color: var(--primary); border: 1px solid var(--primary-border); }
+    .badge-success { background-color: var(--success-subtle); color: var(--success); border: 1px solid var(--success-border); }
+    .badge-danger  { background-color: var(--danger-subtle); color: var(--danger); border: 1px solid var(--danger-border); }
+    .badge-warning { background-color: var(--warning-subtle); color: var(--warning); border: 1px solid var(--warning-border); }
+
+    /* Alerts */
+    .alert {
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+
+    .alert-danger {
+      background-color: var(--danger-subtle);
+      border: 1px solid var(--danger-border);
+      color: var(--danger);
+    }
+
+    .alert-warning {
+      background-color: var(--warning-subtle);
+      border: 1px solid var(--warning-border);
+      color: var(--warning);
+    }
+
+    .alert-success {
+      background-color: var(--success-subtle);
+      border: 1px solid var(--success-border);
+      color: var(--success);
+    }
+
+    /* ==========================================================================
+       LOGIN / AUTH VIEW
+       ========================================================================== */
+    #auth-view {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: radial-gradient(circle at top, var(--primary-subtle) 0%, var(--bg-body) 65%);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .auth-brand-icon {
+      width: 48px;
+      height: 48px;
+      background-color: var(--primary);
+      color: #ffffff;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .auth-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.65rem;
+      font-weight: 600;
+      font-size: 0.925rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s ease;
+    }
+
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .auth-footer-note {
+      text-align: center;
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .pwd-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ==========================================================================
+       DASHBOARD HEADER & NAVIGATION
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-title span.accent {
+      color: var(--primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Business Profile Bar */
+    .profile-hero {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-subtle) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .profile-info h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.45rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .profile-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Settings Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .control-item select, .control-item input {
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background-color: var(--bg-input);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* ==========================================================================
+       DASHBOARD GRID (2 COLUMNS ON DESKTOP)
+       ========================================================================== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 980px) {
+      .dashboard-grid {
+        grid-template-columns: 380px 1fr;
+        align-items: start;
+      }
+    }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--primary);
+    }
+
+    .kpi-card.kpi-success::before { background-color: var(--success); }
+    .kpi-card.kpi-danger::before  { background-color: var(--danger); }
+    .kpi-card.kpi-warning::before { background-color: var(--warning); }
+    .kpi-card.kpi-purple::before  { background-color: var(--chart-fixed); }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .kpi-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .kpi-subtext {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* What-If Sliders */
+    .slider-row {
+      margin-bottom: 1rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.825rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .slider-control {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .slider-control::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border: 2px solid #ffffff;
+      transition: transform 0.1s ease;
+    }
+
+    .slider-control::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .whatif-diff {
+      font-size: 0.775rem;
+      font-weight: 700;
+    }
+
+    .diff-favorable { color: var(--success); }
+    .diff-unfavorable { color: var(--danger); }
+    .diff-neutral { color: var(--text-muted); }
+
+    /* SVG Chart */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      background-color: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+      user-select: none;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .legend-indicator {
+      width: 14px;
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-box {
+      width: 14px;
+      height: 10px;
+      border-radius: 2px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Tooltip */
+    #chart-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.8rem;
+      font-size: 0.775rem;
+      box-shadow: var(--shadow-lg);
+      z-index: 20;
+      transition: opacity 0.1s ease;
+      white-space: nowrap;
+    }
+
+    /* Tables */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .data-table th, .data-table td {
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table th {
+      background-color: var(--bg-subtle);
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.775rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr.highlight-row {
+      background-color: var(--primary-subtle);
+      font-weight: 700;
+    }
+
+    .data-table td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Modal / Profile Dialog */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 100;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 520px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+
+      .no-print, .app-header, .controls-bar, #auth-view, .btn, .slider-control {
+        display: none !important;
+      }
+
+      .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        margin-bottom: 1rem !important;
+      }
+
+      .dashboard-grid {
+        display: block !important;
+      }
+
+      .print-header-block {
+        display: block !important;
+        border-bottom: 2px solid #000000;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .chart-container {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+      }
+
+      .data-table th {
+        background-color: #f1f5f9 !important;
+        color: #000000 !important;
+      }
+
+      .data-table td, .data-table th {
+        border-bottom: 1px solid #ddd !important;
+      }
+    }
+
+    .print-header-block {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       SECTION 1: AUTHENTICATION VIEW (SIGN UP & LOGIN)
+       ========================================================================== -->
+  <div id="auth-view">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="auth-brand-icon">&#9878;</div>
+        <h2 style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em;">Break-Even Predictor</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+          Financial Feasibility & Profit Planning Engine
+        </p>
+      </div>
+
+      <!-- Backend Connection Status Indicator -->
+      <div id="auth-backend-status" style="text-align: center; margin-bottom: 1rem;">
+        <span class="badge badge-success" id="auth-status-badge">&#9679; Checking backend...</span>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <div id="tab-login" class="auth-tab active" onclick="AuthModule.switchTab('login')">Log In</div>
+        <div id="tab-signup" class="auth-tab" onclick="AuthModule.switchTab('signup')">Sign Up</div>
+      </div>
+
+      <!-- Auth Alert Messages -->
+      <div id="auth-alert" class="alert alert-danger hidden"></div>
+
+      <!-- Login Form -->
+      <form id="form-login" onsubmit="AuthModule.handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-control" placeholder="name@company.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="btn-login-submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          Log In to Dashboard
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 0.65rem;" onclick="AuthModule.quickFillDemo()">
+          &#9889; Quick Fill Demo Account
+        </button>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="form-signup" class="hidden" onsubmit="AuthModule.handleSignUp(event)">
+        <div class="form-group">
+          <label for="signup-name">Full Name</label>
+          <input type="text" id="signup-name" class="form-control" placeholder="Jane Doe" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" class="form-control" placeholder="jane@company.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" class="form-control" placeholder="At least 8 chars with a number" required autocomplete="new-password">
+          <div class="pwd-hint">&#9432; Minimum 8 characters with at least one numeric digit (0-9)</div>
+        </div>
+        <div class="form-group">
+          <label for="signup-confirm">Confirm Password</label>
+          <input type="password" id="signup-confirm" class="form-control" placeholder="Re-type password" required autocomplete="new-password">
+        </div>
+        <button type="submit" id="btn-signup-submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          Create Free Account
+        </button>
+      </form>
+
+      <div class="auth-footer-note">
+        &#128274; Client-side security: Passwords hashed with SHA-256 before transmission & storage.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       SECTION 2: MAIN DASHBOARD VIEW
+       ========================================================================== -->
+  <div id="dashboard-view" class="hidden">
+    
+    <!-- Top Navigation Bar -->
+    <header class="app-header no-print">
+      <div class="container nav-inner">
+        <div class="brand-title">
+          <span style="font-size: 1.4rem;">&#9878;</span>
+          <span>BreakEven<span class="accent">Predictor</span></span>
+        </div>
+
+        <div class="nav-actions">
+          <span id="backend-status-pill" class="badge badge-success" style="font-size: 0.725rem;" title="Backend Storage Mode">
+            &#9679; Backend Active
+          </span>
+          <span id="user-greeting" style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted);">
+            Welcome, User
+          </span>
+          <button class="btn btn-secondary btn-sm" onclick="App.toggleTheme()" title="Toggle Dark/Light Mode">
+            <span id="theme-icon">&#9790;</span>
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="window.print()" title="Print Clean Business Report">
+            &#128424; Print Report
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="AuthModule.logout()" title="Log Out">
+            &#9167; Log Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      
+      <!-- Print Letterhead (Rendered only on print / PDF output) -->
+      <div class="print-header-block">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h1 id="print-firm-name" style="font-size: 24pt; font-weight: 800; margin-bottom: 2pt;">Velvet Bean Roastery</h1>
+            <div style="font-size: 11pt; color: #475569;">
+              <span id="print-owner-name">Owner: Elena Rostova</span> &bull; 
+              <span id="print-business-type">Restaurant / Food</span>
+            </div>
+            <div id="print-contact-info" style="font-size: 10pt; color: #64748b; margin-top: 4pt;">
+              Phone: (206) 555-0184 | Email: elena@velvetbean.com | Seattle, WA
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 14pt; font-weight: 800; color: #2563eb;">BREAK-EVEN FEASIBILITY REPORT</div>
+            <div id="print-date" style="font-size: 9pt; color: #64748b; margin-top: 4pt;">Generated: Oct 15, 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Business Profile Summary Card -->
+      <div class="profile-hero no-print">
+        <div class="profile-info">
+          <h1>
+            <span id="disp-firm-name">My Enterprise</span>
+            <span id="disp-business-type" class="badge badge-primary">Retail</span>
+          </h1>
+          <div class="profile-meta">
+            <span>&#128100; <strong id="disp-owner-name">Owner Name</strong></span>
+            <span>&#9742; <span id="disp-phone">(555) 000-0000</span></span>
+            <span>&#9993; <span id="disp-email">owner@business.com</span></span>
+            <span>&#128205; <span id="disp-address">City, Country</span></span>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-secondary btn-sm" onclick="ProfileModule.openModal()">
+            &#9998; Edit Business Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- Global Settings & Quick Actions Bar -->
+      <div class="controls-bar no-print">
+        <div class="flex items-center gap-3" style="flex-wrap: wrap;">
+          <div class="control-item">
+            <label for="currency-select">Currency:</label>
+            <select id="currency-select" onchange="App.onCurrencyChange()">
+              <option value="$" selected>USD ($)</option>
+              <option value="€">EUR (€)</option>
+              <option value="£">GBP (£)</option>
+              <option value="₹">INR (₹)</option>
+              <option value="¥">JPY (¥)</option>
+              <option value="CA$">CAD (CA$)</option>
+              <option value="A$">AUD (A$)</option>
+              <option value="CHF">CHF (Fr)</option>
+            </select>
+          </div>
+          <div class="control-item">
+            <label for="unit-label-input">Unit Label:</label>
+            <input type="text" id="unit-label-input" value="units" style="width: 100px;" oninput="App.onUnitLabelChange()">
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="btn btn-secondary btn-sm" onclick="App.loadSampleData()">
+            &#128161; Load Sample Business
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="App.resetInputs()">
+            &#10227; Reset Inputs
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Calculation Warning / Info Alert -->
+      <div id="calc-alert" class="alert hidden"></div>
+
+      <!-- Dashboard Main 2-Column Grid -->
+      <div class="dashboard-grid">
+        
+        <!-- LEFT COLUMN: INPUTS & WHAT-IF SLIDERS -->
+        <div class="flex-col gap-4">
+          
+          <!-- Core Cost & Sales Inputs Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">&#9881; Cost & Sales Drivers</h2>
+              <span id="sync-status-badge" class="badge badge-primary">Auto-Saved</span>
+            </div>
+
+            <form id="inputs-form" onsubmit="event.preventDefault();">
+              <!-- Fixed Costs -->
+              <div class="form-group">
+                <label for="inp-fixed-costs">Fixed Costs (F)</label>
+                <div class="input-addon-wrapper">
+                  <span class="input-addon-left curr-symbol">$</span>
+                  <input type="number" id="inp-fixed-costs" class="form-control input-with-addon" min="0" step="any" placeholder="15000" oninput="App.onInputChange()">
+                </div>
+                <div class="pwd-hint">Rent, insurance, salaries, equipment, overhead.</div>
+              </div>
+
+              <!-- Selling Price per Unit -->
+              <div class="form-group">
+                <label for="inp-price">Selling Price per Unit (P)</label>
+                <div class="input-addon-wrapper">
+                  <span class="input-addon-left curr-symbol">$</span>
+                  <input type="number" id="inp-price" class="form-control input-with-addon" min="0.01" step="any" placeholder="50.00" oninput="App.onInputChange()">
+                </div>
+                <div class="pwd-hint">Gross price charged to customer per unit.</div>
+              </div>
+
+              <!-- Variable Cost per Unit -->
+              <div class="form-group">
+                <label for="inp-variable-cost">Variable Cost per Unit (V)</label>
+                <div class="input-addon-wrapper">
+                  <span class="input-addon-left curr-symbol">$</span>
+                  <input type="number" id="inp-variable-cost" class="form-control input-with-addon" min="0" step="any" placeholder="20.00" oninput="App.onInputChange()">
+                </div>
+                <div class="pwd-hint">Direct materials, labor, packaging, per-unit fees.</div>
+              </div>
+
+              <!-- Expected Sales Volume -->
+              <div class="form-group">
+                <label for="inp-volume">Expected Sales Volume (Q)</label>
+                <div class="input-addon-wrapper">
+                  <input type="number" id="inp-volume" class="form-control" min="0" step="any" placeholder="800" oninput="App.onInputChange()">
+                </div>
+                <div class="pwd-hint">Projected sales volume in <span class="unit-text">units</span>.</div>
+              </div>
+
+              <!-- Target Profit -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="inp-target-profit">Target Profit (T) <em style="font-weight: normal; color: var(--text-muted);">(Optional)</em></label>
+                <div class="input-addon-wrapper">
+                  <span class="input-addon-left curr-symbol">$</span>
+                  <input type="number" id="inp-target-profit" class="form-control input-with-addon" min="0" step="any" placeholder="5000" oninput="App.onInputChange()">
+                </div>
+                <div class="pwd-hint">Desired net earnings goal.</div>
+              </div>
+            </form>
+          </div>
+
+          <!-- What-If Real-Time Sensitivity Sliders Card -->
+          <div class="card no-print">
+            <div class="card-header">
+              <h2 class="card-title">&#9794; What-If Adjustment Sliders</h2>
+              <button class="btn btn-secondary btn-sm" onclick="WhatIfModule.resetSliders()">Reset Sliders</button>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Simulate variations (-50% to +50%) and observe instant impact on break-even & profit versus base case.
+            </p>
+
+            <!-- Slider 1: Selling Price -->
+            <div class="slider-row">
+              <div class="slider-header">
+                <span>Selling Price</span>
+                <span id="slider-price-val" class="badge badge-primary">0% ($0.00)</span>
+              </div>
+              <input type="range" id="slider-price" class="slider-control" min="-50" max="50" step="1" value="0" oninput="WhatIfModule.onSliderChange()">
+            </div>
+
+            <!-- Slider 2: Variable Cost -->
+            <div class="slider-row">
+              <div class="slider-header">
+                <span>Variable Cost</span>
+                <span id="slider-var-val" class="badge badge-primary">0% ($0.00)</span>
+              </div>
+              <input type="range" id="slider-var" class="slider-control" min="-50" max="50" step="1" value="0" oninput="WhatIfModule.onSliderChange()">
+            </div>
+
+            <!-- Slider 3: Fixed Costs -->
+            <div class="slider-row">
+              <div class="slider-header">
+                <span>Fixed Costs</span>
+                <span id="slider-fixed-val" class="badge badge-primary">0% ($0.00)</span>
+              </div>
+              <input type="range" id="slider-fixed" class="slider-control" min="-50" max="50" step="1" value="0" oninput="WhatIfModule.onSliderChange()">
+            </div>
+
+            <!-- What-if Comparison Summary Box -->
+            <div style="background-color: var(--bg-subtle); border-radius: var(--radius-md); padding: 0.85rem; border: 1px solid var(--border); margin-top: 0.85rem;">
+              <div style="font-size: 0.775rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">
+                Adjusted Scenario vs Base Case
+              </div>
+              <div class="flex justify-between items-center" style="font-size: 0.85rem; margin-bottom: 0.35rem;">
+                <span>New Break-Even Units:</span>
+                <span id="whatif-be-units" class="whatif-diff diff-neutral">--</span>
+              </div>
+              <div class="flex justify-between items-center" style="font-size: 0.85rem; margin-bottom: 0.35rem;">
+                <span>New Break-Even Revenue:</span>
+                <span id="whatif-be-rev" class="whatif-diff diff-neutral">--</span>
+              </div>
+              <div class="flex justify-between items-center" style="font-size: 0.85rem;">
+                <span>New Net Profit at Expected Vol:</span>
+                <span id="whatif-profit" class="whatif-diff diff-neutral">--</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- RIGHT COLUMN: KPIS, INLINE SVG CHART, SENSITIVITY & SCENARIO TABLES -->
+        <div class="flex-col gap-4">
+          
+          <!-- Key Metrics / KPI Grid -->
+          <div class="kpi-grid">
+            
+            <div class="kpi-card kpi-primary">
+              <div class="kpi-label">Break-Even Units</div>
+              <div id="kpi-be-units" class="kpi-value">0</div>
+              <div class="kpi-subtext">Sales volume to cover costs</div>
+            </div>
+
+            <div class="kpi-card kpi-purple">
+              <div class="kpi-label">Break-Even Revenue</div>
+              <div id="kpi-be-revenue" class="kpi-value">$0.00</div>
+              <div class="kpi-subtext">Gross revenue at break-even</div>
+            </div>
+
+            <div class="kpi-card kpi-primary">
+              <div class="kpi-label">Contribution Margin</div>
+              <div id="kpi-cm" class="kpi-value">$0.00</div>
+              <div id="kpi-cm-ratio" class="kpi-subtext">0.0% of selling price</div>
+            </div>
+
+            <div class="kpi-card" id="kpi-profit-card">
+              <div class="kpi-label">Expected Net Profit</div>
+              <div id="kpi-profit" class="kpi-value">$0.00</div>
+              <div id="kpi-profit-sub" class="kpi-subtext">At planned volume</div>
+            </div>
+
+            <div class="kpi-card" id="kpi-mos-card">
+              <div class="kpi-label">Margin of Safety</div>
+              <div id="kpi-mos-units" class="kpi-value">0 units</div>
+              <div id="kpi-mos-ratio" class="kpi-subtext">0.0% buffer against loss</div>
+            </div>
+
+            <div class="kpi-card kpi-warning">
+              <div class="kpi-label">For Target Profit</div>
+              <div id="kpi-target-units" class="kpi-value">0 units</div>
+              <div id="kpi-target-rev" class="kpi-subtext">$0.00 target revenue</div>
+            </div>
+
+            <div class="kpi-card kpi-primary">
+              <div class="kpi-label">Operating Leverage</div>
+              <div id="kpi-dol" class="kpi-value">--</div>
+              <div class="kpi-subtext">% profit shift per 1% volume shift</div>
+            </div>
+
+          </div>
+
+          <!-- Interactive Inline SVG Break-Even Chart -->
+          <div class="chart-container">
+            <div class="flex justify-between items-center" style="margin-bottom: 0.5rem;">
+              <h2 class="card-title" style="font-size: 1rem;">&#128200; Break-Even Feasibility Chart</h2>
+              <span style="font-size: 0.775rem; color: var(--text-muted);">Interactive: Hover or touch to read values</span>
+            </div>
+
+            <!-- Tooltip Popup -->
+            <div id="chart-tooltip" class="hidden"></div>
+
+            <!-- Inline SVG Canvas -->
+            <svg id="be-chart-svg" class="chart-svg" viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="profitGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.30"/>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0.05"/>
+                </linearGradient>
+                <linearGradient id="lossGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.28"/>
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0.05"/>
+                </linearGradient>
+                <filter id="shadowFilter" x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+                </filter>
+              </defs>
+              <g id="chart-content"></g>
+            </svg>
+
+            <!-- Chart Legend -->
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-indicator" style="background-color: var(--chart-rev);"></div>
+                <span>Total Revenue (P &times; Q)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-indicator" style="background-color: var(--chart-cost);"></div>
+                <span>Total Cost (F + V &times; Q)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-indicator" style="background-color: var(--chart-fixed); border-style: dashed;"></div>
+                <span>Fixed Costs (F)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background-color: var(--chart-plan);"></div>
+                <span>Expected Plan (Q)</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-box" style="background-color: var(--chart-profit-zone);"></div>
+                <span>Profit Zone</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-box" style="background-color: var(--chart-loss-zone);"></div>
+                <span>Loss Zone</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Volume Scenario Analysis Table -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">&#128203; Volume Scenario Analysis</h2>
+              <span class="badge badge-primary">Pessimistic / Base / Optimistic</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="table-scenarios">
+                <thead>
+                  <tr>
+                    <th>Scenario</th>
+                    <th class="num">Sales Volume</th>
+                    <th class="num">Total Revenue</th>
+                    <th class="num">Total Cost</th>
+                    <th class="num">Net Profit / Loss</th>
+                    <th class="num">Margin of Safety</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-scenarios">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Sensitivity Analysis Table -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">&#128394; Sensitivity Analysis Table</h2>
+              <span class="badge badge-primary">Break-Even Volume Shift</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+              Shows the required break-even units when an individual driver varies between -20% and +20%.
+            </p>
+            <div class="table-responsive">
+              <table class="data-table" id="table-sensitivity">
+                <thead>
+                  <tr>
+                    <th>Driver Variable</th>
+                    <th class="num">-20%</th>
+                    <th class="num">-10%</th>
+                    <th class="num highlight-row" style="background-color: var(--primary-subtle); color: var(--primary);">Base Case (0%)</th>
+                    <th class="num">+10%</th>
+                    <th class="num">+20%</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-sensitivity">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       SECTION 3: EDIT BUSINESS PROFILE MODAL
+       ========================================================================== -->
+  <div id="profile-modal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="card-header" style="margin-bottom: 1rem;">
+        <h2 class="card-title">&#128188; Edit Business Profile</h2>
+        <button class="btn btn-secondary btn-sm" onclick="ProfileModule.closeModal()">&times;</button>
+      </div>
+
+      <div id="profile-alert" class="alert alert-danger hidden"></div>
+
+      <form id="form-profile" onsubmit="ProfileModule.handleSave(event)">
+        <div class="form-group">
+          <label for="prof-firm-name">Firm / Business Name</label>
+          <input type="text" id="prof-firm-name" class="form-control" placeholder="e.g. Apex Manufacturing Co." required>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-owner-name">Owner / Executive Name</label>
+          <input type="text" id="prof-owner-name" class="form-control" placeholder="e.g. John Smith" required>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-type">Type of Business</label>
+          <select id="prof-type" class="form-control" required>
+            <option value="Retail">Retail</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Restaurant / Food">Restaurant / Food</option>
+            <option value="Services">Services</option>
+            <option value="Wholesale">Wholesale</option>
+            <option value="E-commerce">E-commerce</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-phone">Contact Phone (10 digits)</label>
+          <input type="tel" id="prof-phone" class="form-control" placeholder="e.g. 5551234567" required>
+          <div class="pwd-hint">Must contain exactly 10 digits (e.g. 2065550184)</div>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-email">Contact Email</label>
+          <input type="email" id="prof-email" class="form-control" placeholder="contact@firm.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="prof-address">City / Address</label>
+          <input type="text" id="prof-address" class="form-control" placeholder="e.g. Austin, TX" required>
+        </div>
+
+        <div class="flex justify-between items-center" style="margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="ProfileModule.closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">&#10003; Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       SECTION 4: JAVASCRIPT LOGIC (PLAIN ES5 STYLE FOR MAXIMUM COMPATIBILITY)
+       ========================================================================== */
+  -->
+  <script>
+    /* ==========================================================================
+       MODULE 0: PURE MATHEMATICAL BREAK-EVEN ENGINE
+       model(F, P, V, Q, T)
+       ========================================================================== */
+    /**
+     * Pure function calculating all break-even, profitability, and safety metrics.
+     */
+    function model(F, P, V, Q, T) {
+      F = Math.max(0, Number(F) || 0);
+      P = Math.max(0, Number(P) || 0);
+      V = Math.max(0, Number(V) || 0);
+      Q = Math.max(0, Number(Q) || 0);
+      T = Math.max(0, Number(T) || 0);
+
+      var cm = P - V; // Contribution margin per unit
+      var cmRatio = P > 0 ? (cm / P) : 0;
+      var isValid = cm > 0; // Break-even exists only when P > V
+
+      var beUnits = isValid ? (F / cm) : Infinity;
+      var beRevenue = isValid ? (beUnits * P) : Infinity;
+
+      var expRevenue = P * Q;
+      var expVariableCost = V * Q;
+      var expTotalCost = F + expVariableCost;
+      var expProfit = expRevenue - expTotalCost;
+
+      var mosUnits = isValid ? (Q - beUnits) : (-Infinity);
+      var mosRatio = (isValid && Q > 0) ? ((Q - beUnits) / Q) : 0;
+      var mosRevenue = isValid ? (mosUnits * P) : (-Infinity);
+
+      var targetUnits = isValid ? ((F + T) / cm) : Infinity;
+      var targetRevenue = isValid ? (targetUnits * P) : Infinity;
+
+      // Degree of Operating Leverage: (Q * CM) / Operating Profit
+      var totalCM = Q * cm;
+      var dol = (expProfit > 0) ? (totalCM / expProfit) : null;
+
+      return {
+        F: F,
+        P: P,
+        V: V,
+        Q: Q,
+        T: T,
+        cm: cm,
+        cmRatio: cmRatio,
+        isValid: isValid,
+        beUnits: beUnits,
+        beRevenue: beRevenue,
+        expRevenue: expRevenue,
+        expVariableCost: expVariableCost,
+        expTotalCost: expTotalCost,
+        expProfit: expProfit,
+        mosUnits: mosUnits,
+        mosRatio: mosRatio,
+        mosRevenue: mosRevenue,
+        targetUnits: targetUnits,
+        targetRevenue: targetRevenue,
+        dol: dol
+      };
+    }
+
+
+    /* ==========================================================================
+       STORAGE SERVICE WRAPPER (Safeguarded LocalStorage Fallback)
+       ========================================================================== */
+    var Storage = {
+      USERS_KEY: 'bep_users_store',
+      SESSION_KEY: 'bep_session_user_email',
+      TOKEN_KEY: 'bep_auth_token',
+      THEME_KEY: 'bep_theme_preference',
+
+      getUsers: function() {
+        try {
+          var raw = localStorage.getItem(this.USERS_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      },
+
+      saveUsers: function(users) {
+        try {
+          localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+
+      getToken: function() {
+        try {
+          return localStorage.getItem(this.TOKEN_KEY);
+        } catch (e) {
+          return null;
+        }
+      },
+
+      setToken: function(tok) {
+        try {
+          if (tok) {
+            localStorage.setItem(this.TOKEN_KEY, tok);
+          } else {
+            localStorage.removeItem(this.TOKEN_KEY);
+          }
+        } catch (e) {}
+      },
+
+      getSessionEmail: function() {
+        try {
+          return localStorage.getItem(this.SESSION_KEY);
+        } catch (e) {
+          return null;
+        }
+      },
+
+      setSessionEmail: function(email) {
+        try {
+          if (email) {
+            localStorage.setItem(this.SESSION_KEY, email);
+          } else {
+            localStorage.removeItem(this.SESSION_KEY);
+          }
+        } catch (e) {}
+      },
+
+      getTheme: function() {
+        try {
+          return localStorage.getItem(this.THEME_KEY) || 'light';
+        } catch (e) {
+          return 'light';
+        }
+      },
+
+      setTheme: function(theme) {
+        try {
+          localStorage.setItem(this.THEME_KEY, theme);
+        } catch (e) {}
+      }
+    };
+
+
+    /* ==========================================================================
+       CRYPTO HELPER (SHA-256 with Pure JS Fallback)
+       ========================================================================== */
+    var CryptoHelper = {
+      jsSha256: function(ascii) {
+        function rightRotate(value, amount) {
+          return (value >>> amount) | (value << (32 - amount));
+        }
+        var mathPow = Math.pow;
+        var maxWord = mathPow(2, 32);
+        var lengthProperty = 'length';
+        var i, j;
+        var result = '';
+        var words = [];
+        var asciiBitLength = ascii[lengthProperty] * 8;
+        var hash = [];
+        var k = [];
+        var primeCounter = 0;
+
+        var isPrime = function(candidate) {
+          for (var factor = 2; factor * factor <= candidate; factor++) {
+            if (candidate % factor === 0) return false;
+          }
+          return true;
+        };
+
+        for (var candidate = 2; primeCounter < 64; candidate++) {
+          if (isPrime(candidate)) {
+            if (primeCounter < 8) {
+              hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+            }
+            k[primeCounter] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+            primeCounter++;
+          }
+        }
+
+        ascii += '\x80';
+        while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+        for (i = 0; i < ascii[lengthProperty]; i++) {
+          j = ascii.charCodeAt(i);
+          if (j >> 8) return;
+          words[i >> 2] |= j << ((3 - i % 4) * 8);
+        }
+        words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
+        words[words[lengthProperty]] = (asciiBitLength | 0);
+
+        for (j = 0; j < words[lengthProperty];) {
+          var w = words.slice(j, j += 16);
+          var oldHash = hash;
+          hash = hash.slice(0, 8);
+
+          for (i = 0; i < 64; i++) {
+            var i2 = i + j;
+            var w15 = w[i - 15], w2 = w[i - 2];
+            var a = hash[0], e = hash[4];
+            var temp1 = hash[7]
+              + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+              + ((e & hash[5]) ^ ((~e) & hash[6]))
+              + k[i]
+              + (w[i] = (i < 16) ? w[i] : (
+                w[i - 16]
+                + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+                + w[i - 7]
+                + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+              ) | 0);
+
+            var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+              + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+
+            hash = [(temp1 + temp2) | 0].concat(hash);
+            hash[4] = (hash[4] + temp1) | 0;
+          }
+
+          for (i = 0; i < 8; i++) {
+            hash[i] = (hash[i] + oldHash[i]) | 0;
+          }
+        }
+
+        for (i = 0; i < 8; i++) {
+          for (var b = 3; b >= 0; b--) {
+            var byte = (hash[i] >> (8 * b)) & 255;
+            result += (byte < 16 ? '0' : '') + byte.toString(16);
+          }
+        }
+        return result;
+      },
+
+      hash: function(password, callback) {
+        var self = this;
+        try {
+          if (window.crypto && window.crypto.subtle && window.crypto.subtle.digest && typeof TextEncoder !== 'undefined') {
+            var encoder = new TextEncoder();
+            var data = encoder.encode(password);
+            window.crypto.subtle.digest('SHA-256', data).then(function(buf) {
+              var bytes = new Uint8Array(buf);
+              var hex = '';
+              for (var i = 0; i < bytes.length; i++) {
+                var b = bytes[i].toString(16);
+                if (b.length < 2) b = '0' + b;
+                hex += b;
+              }
+              callback(null, hex);
+            }).catch(function(err) {
+              callback(null, self.jsSha256(password));
+            });
+          } else {
+            callback(null, self.jsSha256(password));
+          }
+        } catch (e) {
+          callback(null, self.jsSha256(password));
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 1: API CLIENT (Backend REST API Integration)
+       ========================================================================== */
+    var ApiClient = {
+      isBackendAvailable: false,
+      baseUrl: (function() {
+        if (window.location.protocol.indexOf('http') === 0) {
+          return '/api';
+        }
+        return 'http://localhost:8000/api';
+      })(),
+
+      request: function(method, endpoint, data, callback) {
+        var url = this.baseUrl + endpoint;
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        var token = Storage.getToken();
+        if (token) {
+          xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+
+        xhr.onload = function() {
+          var resData = {};
+          try {
+            resData = JSON.parse(xhr.responseText);
+          } catch (e) {}
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            callback(null, resData);
+          } else {
+            callback(resData.error || ('HTTP Error ' + xhr.status), resData);
+          }
+        };
+
+        xhr.onerror = function() {
+          callback('Network error connecting to backend server', null);
+        };
+
+        if (data) {
+          xhr.send(JSON.stringify(data));
+        } else {
+          xhr.send();
+        }
+      },
+
+      checkHealth: function(callback) {
+        var self = this;
+        this.request('GET', '/health', null, function(err, res) {
+          if (!err && res && res.status === 'ok') {
+            self.isBackendAvailable = true;
+            self.updateBadges(true, res.backend || 'Active');
+            if (callback) callback(true, res);
+          } else {
+            self.isBackendAvailable = false;
+            self.updateBadges(false, null);
+            if (callback) callback(false, null);
+          }
+        });
+      },
+
+      updateBadges: function(online, backendName) {
+        var badge = document.getElementById('backend-status-pill');
+        var authBadge = document.getElementById('auth-status-badge');
+
+        if (online) {
+          if (badge) {
+            badge.className = 'badge badge-success';
+            badge.innerHTML = '&#9679; Backend: ' + (backendName || 'SQLite DB');
+          }
+          if (authBadge) {
+            authBadge.className = 'badge badge-success';
+            authBadge.innerHTML = '&#9679; Connected to Backend Server (SQLite DB)';
+          }
+        } else {
+          if (badge) {
+            badge.className = 'badge badge-warning';
+            badge.innerHTML = '&#9675; Client Offline (localStorage)';
+          }
+          if (authBadge) {
+            authBadge.className = 'badge badge-warning';
+            authBadge.innerHTML = '&#9675; Local Client Mode (localStorage)';
+          }
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 2: AUTHENTICATION MODULE
+       ========================================================================== */
+    var AuthModule = {
+      currentUser: null,
+
+      switchTab: function(tabName) {
+        var loginTab = document.getElementById('tab-login');
+        var signupTab = document.getElementById('tab-signup');
+        var formLogin = document.getElementById('form-login');
+        var formSignup = document.getElementById('form-signup');
+        var alertBox = document.getElementById('auth-alert');
+
+        alertBox.className = 'alert alert-danger hidden';
+
+        if (tabName === 'login') {
+          loginTab.className = 'auth-tab active';
+          signupTab.className = 'auth-tab';
+          formLogin.className = '';
+          formSignup.className = 'hidden';
+        } else {
+          loginTab.className = 'auth-tab';
+          signupTab.className = 'auth-tab active';
+          formLogin.className = 'hidden';
+          formSignup.className = '';
+        }
+      },
+
+      showError: function(msg) {
+        var alertBox = document.getElementById('auth-alert');
+        alertBox.textContent = msg;
+        alertBox.className = 'alert alert-danger';
+      },
+
+      validateEmail: function(email) {
+        var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+      },
+
+      validatePassword: function(pwd) {
+        if (!pwd || pwd.length < 8) return false;
+        return /\d/.test(pwd);
+      },
+
+      handleSignUp: function(e) {
+        e.preventDefault();
+        var self = this;
+        var name = document.getElementById('signup-name').value.trim();
+        var email = document.getElementById('signup-email').value.trim().toLowerCase();
+        var pwd = document.getElementById('signup-password').value;
+        var confirm = document.getElementById('signup-confirm').value;
+
+        if (!name) {
+          self.showError('Please enter your full name.');
+          return;
+        }
+        if (!self.validateEmail(email)) {
+          self.showError('Please enter a valid email address.');
+          return;
+        }
+        if (!self.validatePassword(pwd)) {
+          self.showError('Password must be at least 8 characters long and contain at least one numeric digit (0-9).');
+          return;
+        }
+        if (pwd !== confirm) {
+          self.showError('Passwords do not match. Please verify.');
+          return;
+        }
+
+        CryptoHelper.hash(pwd, function(err, hashed) {
+          if (err || !hashed) {
+            self.showError('Could not process password security hash.');
+            return;
+          }
+
+          var payload = {
+            name: name,
+            email: email,
+            password_hash: hashed,
+            profile: {
+              firm_name: name + "'s Business",
+              owner_name: name,
+              business_type: 'Retail',
+              phone: '5551234567',
+              email: email,
+              address: 'Downtown Headquarters'
+            },
+            inputs: {
+              fixed_costs: 12000,
+              selling_price: 40,
+              variable_cost: 15,
+              expected_volume: 600,
+              target_profit: 3000,
+              currency: '$',
+              unit_label: 'units'
+            }
+          };
+
+          if (ApiClient.isBackendAvailable) {
+            ApiClient.request('POST', '/auth/signup', payload, function(apiErr, res) {
+              if (apiErr) {
+                self.showError(apiErr);
+              } else {
+                Storage.setToken(res.token);
+                self.loginUser(res.user, res.profile, res.inputs);
+              }
+            });
+          } else {
+            // Local fallback
+            var users = Storage.getUsers();
+            if (users[email]) {
+              self.showError('This email is already registered locally.');
+              return;
+            }
+            users[email] = {
+              name: name,
+              email: email,
+              passwordHash: hashed,
+              profile: {
+                firmName: payload.profile.firm_name,
+                ownerName: payload.profile.owner_name,
+                businessType: payload.profile.business_type,
+                phone: payload.profile.phone,
+                email: payload.profile.email,
+                address: payload.profile.address
+              },
+              inputs: {
+                fixedCosts: 12000,
+                sellingPrice: 40,
+                variableCost: 15,
+                expectedVolume: 600,
+                targetProfit: 3000,
+                currency: '$',
+                unitLabel: 'units'
+              }
+            };
+            Storage.saveUsers(users);
+            self.loginUser(users[email], users[email].profile, users[email].inputs);
+          }
+        });
+      },
+
+      handleLogin: function(e) {
+        e.preventDefault();
+        var self = this;
+        var email = document.getElementById('login-email').value.trim().toLowerCase();
+        var pwd = document.getElementById('login-password').value;
+
+        if (!self.validateEmail(email)) {
+          self.showError('Please enter a valid email address.');
+          return;
+        }
+
+        CryptoHelper.hash(pwd, function(err, hashed) {
+          if (ApiClient.isBackendAvailable) {
+            ApiClient.request('POST', '/auth/login', { email: email, password_hash: hashed }, function(apiErr, res) {
+              if (apiErr) {
+                self.showError(apiErr);
+              } else {
+                Storage.setToken(res.token);
+                self.loginUser(res.user, res.profile, res.inputs);
+              }
+            });
+          } else {
+            // Local fallback
+            var users = Storage.getUsers();
+            var user = users[email];
+            if (!user) {
+              self.showError('No account found with this email. Please sign up.');
+              return;
+            }
+            if (user.passwordHash !== hashed) {
+              self.showError('Incorrect password. Please try again.');
+              return;
+            }
+            self.loginUser(user, user.profile, user.inputs);
+          }
+        });
+      },
+
+      loginUser: function(user, profile, inputs) {
+        this.currentUser = user;
+        Storage.setSessionEmail(user.email);
+
+        document.getElementById('auth-view').className = 'hidden';
+        document.getElementById('dashboard-view').className = '';
+        document.getElementById('user-greeting').textContent = 'Welcome, ' + user.name;
+
+        ProfileModule.load(profile || {});
+        App.loadUserInputs(inputs || {});
+      },
+
+      logout: function() {
+        if (ApiClient.isBackendAvailable) {
+          ApiClient.request('POST', '/auth/logout', {}, function() {});
+        }
+        this.currentUser = null;
+        Storage.setSessionEmail(null);
+        Storage.setToken(null);
+        document.getElementById('dashboard-view').className = 'hidden';
+        document.getElementById('auth-view').className = '';
+        this.switchTab('login');
+      },
+
+      quickFillDemo: function() {
+        var demoEmail = 'demo@business.com';
+        document.getElementById('login-email').value = demoEmail;
+        document.getElementById('login-password').value = 'Demo1234';
+
+        // Pre-fill local storage in case backend is offline
+        var users = Storage.getUsers();
+        if (!users[demoEmail]) {
+          CryptoHelper.hash('Demo1234', function(err, hashed) {
+            users[demoEmail] = {
+              name: 'Elena Rostova',
+              email: demoEmail,
+              passwordHash: hashed,
+              profile: {
+                firmName: 'Velvet Bean Roastery',
+                ownerName: 'Elena Rostova',
+                businessType: 'Restaurant / Food',
+                phone: '2065550184',
+                email: 'elena@velvetbean.com',
+                address: 'Pike Place Market, Seattle, WA'
+              },
+              inputs: {
+                fixedCosts: 12500,
+                sellingPrice: 6.50,
+                variableCost: 2.10,
+                expectedVolume: 3800,
+                targetProfit: 5000,
+                currency: '$',
+                unitLabel: 'cups'
+              }
+            };
+            Storage.saveUsers(users);
+          });
+        }
+
+        var form = document.getElementById('form-login');
+        var evt = new Event('submit', { cancelable: true });
+        form.dispatchEvent(evt);
+      },
+
+      checkSession: function() {
+        var self = this;
+        var token = Storage.getToken();
+
+        if (ApiClient.isBackendAvailable && token) {
+          ApiClient.request('GET', '/auth/me', null, function(err, res) {
+            if (!err && res && res.authenticated) {
+              self.loginUser(res.user, res.profile, res.inputs);
+            } else {
+              self.checkLocalSession();
+            }
+          });
+        } else {
+          this.checkLocalSession();
+        }
+      },
+
+      checkLocalSession: function() {
+        var email = Storage.getSessionEmail();
+        if (email) {
+          var users = Storage.getUsers();
+          if (users[email]) {
+            this.loginUser(users[email], users[email].profile, users[email].inputs);
+            return true;
+          }
+        }
+        return false;
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 3: BUSINESS PROFILE MODULE
+       ========================================================================== */
+    var ProfileModule = {
+      profileData: {},
+
+      load: function(prof) {
+        if (!prof) prof = {};
+        this.profileData = {
+          firmName: prof.firm_name || prof.firmName || 'My Enterprise',
+          ownerName: prof.owner_name || prof.ownerName || 'Business Owner',
+          businessType: prof.business_type || prof.businessType || 'Retail',
+          phone: prof.phone || '5551234567',
+          email: prof.email || 'owner@business.com',
+          address: prof.address || 'Headquarters'
+        };
+        this.render();
+      },
+
+      render: function() {
+        var d = this.profileData;
+        document.getElementById('disp-firm-name').textContent = d.firmName;
+        document.getElementById('disp-owner-name').textContent = d.ownerName;
+        document.getElementById('disp-business-type').textContent = d.businessType;
+        document.getElementById('disp-phone').textContent = this.formatPhone(d.phone);
+        document.getElementById('disp-email').textContent = d.email;
+        document.getElementById('disp-address').textContent = d.address;
+
+        document.getElementById('print-firm-name').textContent = d.firmName;
+        document.getElementById('print-owner-name').textContent = 'Owner: ' + d.ownerName;
+        document.getElementById('print-business-type').textContent = d.businessType;
+        document.getElementById('print-contact-info').textContent = 
+          'Phone: ' + this.formatPhone(d.phone) + ' | Email: ' + d.email + ' | ' + d.address;
+        document.getElementById('print-date').textContent = 'Generated: ' + new Date().toLocaleDateString(undefined, {
+          year: 'numeric', month: 'short', day: 'numeric'
+        });
+      },
+
+      formatPhone: function(p) {
+        var clean = String(p).replace(/\D/g, '');
+        if (clean.length === 10) {
+          return '(' + clean.substring(0, 3) + ') ' + clean.substring(3, 6) + '-' + clean.substring(6);
+        }
+        return p;
+      },
+
+      openModal: function() {
+        var d = this.profileData;
+        document.getElementById('prof-firm-name').value = d.firmName;
+        document.getElementById('prof-owner-name').value = d.ownerName;
+        document.getElementById('prof-type').value = d.businessType;
+        document.getElementById('prof-phone').value = d.phone;
+        document.getElementById('prof-email').value = d.email;
+        document.getElementById('prof-address').value = d.address;
+
+        document.getElementById('profile-alert').className = 'alert alert-danger hidden';
+        document.getElementById('profile-modal').className = 'modal-backdrop';
+      },
+
+      closeModal: function() {
+        document.getElementById('profile-modal').className = 'modal-backdrop hidden';
+      },
+
+      handleSave: function(e) {
+        e.preventDefault();
+        var firm = document.getElementById('prof-firm-name').value.trim();
+        var owner = document.getElementById('prof-owner-name').value.trim();
+        var type = document.getElementById('prof-type').value;
+        var phone = document.getElementById('prof-phone').value.trim();
+        var email = document.getElementById('prof-email').value.trim().toLowerCase();
+        var address = document.getElementById('prof-address').value.trim();
+
+        var alertBox = document.getElementById('profile-alert');
+
+        if (!firm || !owner || !address) {
+          alertBox.textContent = 'Please fill out all business fields.';
+          alertBox.className = 'alert alert-danger';
+          return;
+        }
+
+        var cleanPhone = phone.replace(/[\s\-\(\)\.]/g, '');
+        if (cleanPhone.length !== 10 || !/^\d{10}$/.test(cleanPhone)) {
+          alertBox.textContent = 'Contact phone number must be exactly 10 digits.';
+          alertBox.className = 'alert alert-danger';
+          return;
+        }
+
+        if (!AuthModule.validateEmail(email)) {
+          alertBox.textContent = 'Please provide a valid contact email address.';
+          alertBox.className = 'alert alert-danger';
+          return;
+        }
+
+        this.profileData = {
+          firmName: firm,
+          ownerName: owner,
+          businessType: type,
+          phone: cleanPhone,
+          email: email,
+          address: address
+        };
+
+        // Backend save
+        if (ApiClient.isBackendAvailable) {
+          ApiClient.request('POST', '/profile', {
+            firm_name: firm,
+            owner_name: owner,
+            business_type: type,
+            phone: cleanPhone,
+            email: email,
+            address: address
+          }, function() {});
+        }
+
+        // Local cache save
+        if (AuthModule.currentUser) {
+          var users = Storage.getUsers();
+          if (users[AuthModule.currentUser.email]) {
+            users[AuthModule.currentUser.email].profile = this.profileData;
+            Storage.saveUsers(users);
+          }
+        }
+
+        this.render();
+        this.closeModal();
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 4: METRICS & KPI RENDERER
+       ========================================================================== */
+    var MetricsModule = {
+      formatCurrency: function(val, symbol) {
+        if (!isFinite(val)) return 'N/A';
+        var isNeg = val < 0;
+        var abs = Math.abs(val);
+        var formatted = abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return (isNeg ? '-' : '') + (symbol || '$') + formatted;
+      },
+
+      formatNumber: function(val) {
+        if (!isFinite(val)) return 'N/A';
+        return Math.round(val).toLocaleString();
+      },
+
+      formatPercent: function(val) {
+        if (!isFinite(val)) return '0.0%';
+        return (val * 100).toFixed(1) + '%';
+      },
+
+      render: function(calc, currency, unitLabel) {
+        var alertEl = document.getElementById('calc-alert');
+        var beUnitsEl = document.getElementById('kpi-be-units');
+        var beRevEl = document.getElementById('kpi-be-revenue');
+        var cmEl = document.getElementById('kpi-cm');
+        var cmRatioEl = document.getElementById('kpi-cm-ratio');
+        var profitEl = document.getElementById('kpi-profit');
+        var profitSubEl = document.getElementById('kpi-profit-sub');
+        var profitCard = document.getElementById('kpi-profit-card');
+        var mosUnitsEl = document.getElementById('kpi-mos-units');
+        var mosRatioEl = document.getElementById('kpi-mos-ratio');
+        var mosCard = document.getElementById('kpi-mos-card');
+        var targetUnitsEl = document.getElementById('kpi-target-units');
+        var targetRevEl = document.getElementById('kpi-target-rev');
+        var dolEl = document.getElementById('kpi-dol');
+
+        if (!calc.isValid) {
+          alertEl.className = 'alert alert-danger';
+          alertEl.innerHTML = '&#9888; <strong>Warning: Selling price (' + this.formatCurrency(calc.P, currency) + 
+            ') is less than or equal to variable cost (' + this.formatCurrency(calc.V, currency) + 
+            ').</strong> Every unit sold generates a loss. No break-even point exists.';
+        } else if (calc.Q < calc.beUnits) {
+          var deficit = calc.beUnits - calc.Q;
+          alertEl.className = 'alert alert-warning';
+          alertEl.innerHTML = '&#9888; <strong>Caution: Expected sales volume (' + this.formatNumber(calc.Q) + ' ' + unitLabel + 
+            ') is below break-even (' + this.formatNumber(calc.beUnits) + ' ' + unitLabel + ').</strong> ' +
+            'Projected loss is ' + this.formatCurrency(Math.abs(calc.expProfit), currency) + 
+            ' (Need ' + this.formatNumber(deficit) + ' more ' + unitLabel + ' to break even).';
+        } else {
+          alertEl.className = 'alert alert-success';
+          alertEl.innerHTML = '&#10003; <strong>Favorable: Sales volume exceeds break-even!</strong> Projected net profit is ' + 
+            this.formatCurrency(calc.expProfit, currency) + ' with a ' + this.formatPercent(calc.mosRatio) + ' margin of safety.';
+        }
+
+        cmEl.textContent = this.formatCurrency(calc.cm, currency);
+        cmRatioEl.textContent = this.formatPercent(calc.cmRatio) + ' CM ratio';
+
+        if (calc.isValid) {
+          beUnitsEl.textContent = this.formatNumber(calc.beUnits) + ' ' + unitLabel;
+          beRevEl.textContent = this.formatCurrency(calc.beRevenue, currency);
+        } else {
+          beUnitsEl.textContent = 'None (Loss)';
+          beRevEl.textContent = 'None';
+        }
+
+        profitEl.textContent = this.formatCurrency(calc.expProfit, currency);
+        if (calc.expProfit > 0) {
+          profitCard.className = 'kpi-card kpi-success';
+          profitSubEl.textContent = 'Profitable operations';
+        } else if (calc.expProfit < 0) {
+          profitCard.className = 'kpi-card kpi-danger';
+          profitSubEl.textContent = 'Operating at a loss';
+        } else {
+          profitCard.className = 'kpi-card';
+          profitSubEl.textContent = 'Exact break-even';
+        }
+
+        if (calc.isValid && calc.Q >= calc.beUnits) {
+          mosUnitsEl.textContent = this.formatNumber(calc.mosUnits) + ' ' + unitLabel;
+          mosRatioEl.textContent = this.formatPercent(calc.mosRatio) + ' sales volume buffer';
+          mosCard.className = 'kpi-card kpi-success';
+        } else if (calc.isValid) {
+          mosUnitsEl.textContent = '-' + this.formatNumber(Math.abs(calc.mosUnits)) + ' ' + unitLabel;
+          mosRatioEl.textContent = 'Below break-even';
+          mosCard.className = 'kpi-card kpi-danger';
+        } else {
+          mosUnitsEl.textContent = 'N/A';
+          mosRatioEl.textContent = 'No break-even';
+          mosCard.className = 'kpi-card kpi-danger';
+        }
+
+        if (calc.isValid && calc.T > 0) {
+          targetUnitsEl.textContent = this.formatNumber(calc.targetUnits) + ' ' + unitLabel;
+          targetRevEl.textContent = this.formatCurrency(calc.targetRevenue, currency) + ' for target';
+        } else if (calc.isValid) {
+          targetUnitsEl.textContent = 'None set';
+          targetRevEl.textContent = 'Optional input';
+        } else {
+          targetUnitsEl.textContent = 'N/A';
+          targetRevEl.textContent = 'P \u2264 V';
+        }
+
+        if (calc.dol !== null && isFinite(calc.dol)) {
+          dolEl.textContent = calc.dol.toFixed(2) + 'x';
+        } else {
+          dolEl.textContent = 'N/A';
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 5: INLINE SVG BREAK-EVEN CHART (Lines, Zones, Tooltip)
+       ========================================================================== */
+    var ChartModule = {
+      svgWidth: 760,
+      svgHeight: 420,
+      padLeft: 75,
+      padRight: 35,
+      padTop: 30,
+      padBottom: 55,
+
+      currentModel: null,
+      currency: '$',
+      unitLabel: 'units',
+      maxQ: 1000,
+      maxY: 50000,
+
+      render: function(calc, currency, unitLabel) {
+        this.currentModel = calc;
+        this.currency = currency;
+        this.unitLabel = unitLabel;
+
+        var container = document.getElementById('chart-content');
+        container.innerHTML = '';
+
+        var plotW = this.svgWidth - this.padLeft - this.padRight;
+        var plotH = this.svgHeight - this.padTop - this.padBottom;
+
+        var beU = calc.isValid ? calc.beUnits : (calc.Q * 1.5 || 500);
+        var targetMax = Math.max(calc.Q, beU, calc.targetUnits > 0 && isFinite(calc.targetUnits) ? calc.targetUnits : 0);
+        if (targetMax <= 0) targetMax = 100;
+        this.maxQ = Math.ceil(targetMax * 1.35);
+
+        var revAtMax = calc.P * this.maxQ;
+        var costAtMax = calc.F + (calc.V * this.maxQ);
+        var highestY = Math.max(revAtMax, costAtMax, calc.F * 1.4);
+        if (highestY <= 0) highestY = 1000;
+        this.maxY = Math.ceil(highestY * 1.15);
+
+        var self = this;
+        function getX(q) {
+          return self.padLeft + (q / self.maxQ) * plotW;
+        }
+        function getY(val) {
+          return self.padTop + plotH - (val / self.maxY) * plotH;
+        }
+
+        // 1. Gridlines
+        var gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var numTicks = 5;
+
+        for (var i = 0; i <= numTicks; i++) {
+          var yVal = (self.maxY / numTicks) * i;
+          var yPos = getY(yVal);
+
+          var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', self.padLeft);
+          line.setAttribute('y1', yPos);
+          line.setAttribute('x2', self.svgWidth - self.padRight);
+          line.setAttribute('y2', yPos);
+          line.setAttribute('stroke', 'var(--chart-grid)');
+          line.setAttribute('stroke-width', '1');
+          line.setAttribute('stroke-dasharray', i === 0 ? 'none' : '3,3');
+          gridGroup.appendChild(line);
+
+          var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', self.padLeft - 10);
+          text.setAttribute('y', yPos + 4);
+          text.setAttribute('text-anchor', 'end');
+          text.setAttribute('fill', 'var(--chart-text)');
+          text.setAttribute('font-size', '11');
+          text.textContent = currency + (yVal >= 1000 ? (Math.round(yVal / 1000) + 'k') : Math.round(yVal));
+          gridGroup.appendChild(text);
+        }
+
+        for (var j = 0; j <= numTicks; j++) {
+          var qVal = (self.maxQ / numTicks) * j;
+          var xPos = getX(qVal);
+
+          var vline = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          vline.setAttribute('x1', xPos);
+          vline.setAttribute('y1', self.padTop);
+          vline.setAttribute('x2', xPos);
+          vline.setAttribute('y2', self.svgHeight - self.padBottom);
+          vline.setAttribute('stroke', 'var(--chart-grid)');
+          vline.setAttribute('stroke-width', '1');
+          vline.setAttribute('stroke-dasharray', j === 0 ? 'none' : '3,3');
+          gridGroup.appendChild(vline);
+
+          var qText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          qText.setAttribute('x', xPos);
+          qText.setAttribute('y', self.svgHeight - self.padBottom + 18);
+          qText.setAttribute('text-anchor', 'middle');
+          qText.setAttribute('fill', 'var(--chart-text)');
+          qText.setAttribute('font-size', '11');
+          qText.textContent = Math.round(qVal).toLocaleString();
+          gridGroup.appendChild(qText);
+        }
+
+        var xTitle = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        xTitle.setAttribute('x', self.padLeft + plotW / 2);
+        xTitle.setAttribute('y', self.svgHeight - 12);
+        xTitle.setAttribute('text-anchor', 'middle');
+        xTitle.setAttribute('fill', 'var(--chart-text)');
+        xTitle.setAttribute('font-size', '12');
+        xTitle.setAttribute('font-weight', '600');
+        xTitle.textContent = 'Sales Volume (' + unitLabel + ')';
+        gridGroup.appendChild(xTitle);
+
+        container.appendChild(gridGroup);
+
+        // 2. Shaded Zones
+        var zoneGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        if (calc.isValid && calc.beUnits < self.maxQ) {
+          var lossPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          var beX = getX(calc.beUnits);
+          var beY = getY(calc.beRevenue);
+          var pLoss = getX(0) + ',' + getY(calc.F) + ' ' +
+                      beX + ',' + beY + ' ' +
+                      getX(0) + ',' + getY(0);
+          lossPoly.setAttribute('points', pLoss);
+          lossPoly.setAttribute('fill', 'url(#lossGrad)');
+          zoneGroup.appendChild(lossPoly);
+
+          var profPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          var maxQX = getX(self.maxQ);
+          var maxRevY = getY(revAtMax);
+          var maxCostY = getY(costAtMax);
+          var pProf = beX + ',' + beY + ' ' +
+                      maxQX + ',' + maxRevY + ' ' +
+                      maxQX + ',' + maxCostY;
+          profPoly.setAttribute('points', pProf);
+          profPoly.setAttribute('fill', 'url(#profitGrad)');
+          zoneGroup.appendChild(profPoly);
+        } else if (!calc.isValid) {
+          var fullLoss = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          var pts = getX(0) + ',' + getY(calc.F) + ' ' +
+                    getX(self.maxQ) + ',' + getY(costAtMax) + ' ' +
+                    getX(self.maxQ) + ',' + getY(revAtMax) + ' ' +
+                    getX(0) + ',' + getY(0);
+          fullLoss.setAttribute('points', pts);
+          fullLoss.setAttribute('fill', 'url(#lossGrad)');
+          zoneGroup.appendChild(fullLoss);
+        }
+        container.appendChild(zoneGroup);
+
+        // 3. Lines
+        var lineGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+        var fixedLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        fixedLine.setAttribute('x1', getX(0));
+        fixedLine.setAttribute('y1', getY(calc.F));
+        fixedLine.setAttribute('x2', getX(self.maxQ));
+        fixedLine.setAttribute('y2', getY(calc.F));
+        fixedLine.setAttribute('stroke', 'var(--chart-fixed)');
+        fixedLine.setAttribute('stroke-width', '2');
+        fixedLine.setAttribute('stroke-dasharray', '5,4');
+        lineGroup.appendChild(fixedLine);
+
+        var costLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        costLine.setAttribute('x1', getX(0));
+        costLine.setAttribute('y1', getY(calc.F));
+        costLine.setAttribute('x2', getX(self.maxQ));
+        costLine.setAttribute('y2', getY(costAtMax));
+        costLine.setAttribute('stroke', 'var(--chart-cost)');
+        costLine.setAttribute('stroke-width', '2.5');
+        lineGroup.appendChild(costLine);
+
+        var revLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        revLine.setAttribute('x1', getX(0));
+        revLine.setAttribute('y1', getY(0));
+        revLine.setAttribute('x2', getX(self.maxQ));
+        revLine.setAttribute('y2', getY(revAtMax));
+        revLine.setAttribute('stroke', 'var(--chart-rev)');
+        revLine.setAttribute('stroke-width', '2.5');
+        lineGroup.appendChild(revLine);
+
+        container.appendChild(lineGroup);
+
+        // 4. Break-Even Marker
+        var markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        if (calc.isValid && calc.beUnits <= self.maxQ) {
+          var beXPos = getX(calc.beUnits);
+          var beYPos = getY(calc.beRevenue);
+
+          var halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          halo.setAttribute('cx', beXPos);
+          halo.setAttribute('cy', beYPos);
+          halo.setAttribute('r', '9');
+          halo.setAttribute('fill', 'rgba(37, 99, 235, 0.25)');
+          markerGroup.appendChild(halo);
+
+          var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          dot.setAttribute('cx', beXPos);
+          dot.setAttribute('cy', beYPos);
+          dot.setAttribute('r', '5');
+          dot.setAttribute('fill', 'var(--primary)');
+          dot.setAttribute('stroke', '#ffffff');
+          dot.setAttribute('stroke-width', '2');
+          markerGroup.appendChild(dot);
+
+          var beLabelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          var bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          var lblText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          
+          lblText.setAttribute('x', beXPos);
+          lblText.setAttribute('y', beYPos - 14);
+          lblText.setAttribute('text-anchor', 'middle');
+          lblText.setAttribute('fill', 'var(--text-main)');
+          lblText.setAttribute('font-size', '10.5');
+          lblText.setAttribute('font-weight', '700');
+          lblText.textContent = 'BE: ' + Math.round(calc.beUnits).toLocaleString() + ' ' + unitLabel;
+
+          bgRect.setAttribute('x', beXPos - 55);
+          bgRect.setAttribute('y', beYPos - 27);
+          bgRect.setAttribute('width', '110');
+          bgRect.setAttribute('height', '18');
+          bgRect.setAttribute('rx', '4');
+          bgRect.setAttribute('fill', 'var(--bg-card)');
+          bgRect.setAttribute('stroke', 'var(--border)');
+          bgRect.setAttribute('stroke-width', '1');
+          bgRect.setAttribute('filter', 'url(#shadowFilter)');
+
+          beLabelGroup.appendChild(bgRect);
+          beLabelGroup.appendChild(lblText);
+          markerGroup.appendChild(beLabelGroup);
+        }
+
+        // 5. Plan Line
+        if (calc.Q <= self.maxQ) {
+          var qXPos = getX(calc.Q);
+
+          var planLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          planLine.setAttribute('x1', qXPos);
+          planLine.setAttribute('y1', self.padTop);
+          planLine.setAttribute('x2', qXPos);
+          planLine.setAttribute('y2', self.svgHeight - self.padBottom);
+          planLine.setAttribute('stroke', 'var(--chart-plan)');
+          planLine.setAttribute('stroke-width', '2');
+          planLine.setAttribute('stroke-dasharray', '4,3');
+          markerGroup.appendChild(planLine);
+
+          var planRevDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          planRevDot.setAttribute('cx', qXPos);
+          planRevDot.setAttribute('cy', getY(calc.expRevenue));
+          planRevDot.setAttribute('r', '4');
+          planRevDot.setAttribute('fill', 'var(--chart-plan)');
+          planRevDot.setAttribute('stroke', '#ffffff');
+          planRevDot.setAttribute('stroke-width', '1.5');
+          markerGroup.appendChild(planRevDot);
+
+          var planTag = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          planTag.setAttribute('x', qXPos);
+          planTag.setAttribute('y', self.padTop - 8);
+          planTag.setAttribute('text-anchor', 'middle');
+          planTag.setAttribute('fill', 'var(--chart-plan)');
+          planTag.setAttribute('font-size', '10.5');
+          planTag.setAttribute('font-weight', '700');
+          planTag.textContent = 'Plan: ' + Math.round(calc.Q).toLocaleString() + ' ' + unitLabel;
+          markerGroup.appendChild(planTag);
+        }
+
+        container.appendChild(markerGroup);
+        this.setupInteractiveOverlay(container);
+      },
+
+      setupInteractiveOverlay: function(container) {
+        var self = this;
+        var plotW = this.svgWidth - this.padLeft - this.padRight;
+        var plotH = this.svgHeight - this.padTop - this.padBottom;
+
+        var trackerLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        trackerLine.setAttribute('id', 'chart-tracker-line');
+        trackerLine.setAttribute('x1', '0');
+        trackerLine.setAttribute('y1', this.padTop);
+        trackerLine.setAttribute('x2', '0');
+        trackerLine.setAttribute('y2', this.svgHeight - this.padBottom);
+        trackerLine.setAttribute('stroke', 'var(--text-main)');
+        trackerLine.setAttribute('stroke-width', '1.5');
+        trackerLine.setAttribute('stroke-dasharray', '3,3');
+        trackerLine.setAttribute('style', 'display: none;');
+        container.appendChild(trackerLine);
+
+        var hitRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        hitRect.setAttribute('x', this.padLeft);
+        hitRect.setAttribute('y', this.padTop);
+        hitRect.setAttribute('width', plotW);
+        hitRect.setAttribute('height', plotH);
+        hitRect.setAttribute('fill', 'transparent');
+        hitRect.setAttribute('style', 'cursor: crosshair;');
+
+        function handlePointer(clientX, clientY) {
+          var svgEl = document.getElementById('be-chart-svg');
+          var rect = svgEl.getBoundingClientRect();
+          var scaleX = self.svgWidth / rect.width;
+          var svgX = (clientX - rect.left) * scaleX;
+
+          if (svgX < self.padLeft || svgX > self.svgWidth - self.padRight) {
+            hideTooltip();
+            return;
+          }
+
+          var normX = (svgX - self.padLeft) / plotW;
+          var qVal = Math.max(0, Math.round(normX * self.maxQ));
+
+          var rev = self.currentModel.P * qVal;
+          var cost = self.currentModel.F + (self.currentModel.V * qVal);
+          var profit = rev - cost;
+
+          trackerLine.setAttribute('x1', svgX);
+          trackerLine.setAttribute('x2', svgX);
+          trackerLine.setAttribute('style', 'display: block;');
+
+          var tip = document.getElementById('chart-tooltip');
+          var tipHTML = '<strong>Volume: ' + qVal.toLocaleString() + ' ' + self.unitLabel + '</strong><br>' +
+            '<span style="color: var(--chart-rev);">&#9632;</span> Revenue: ' + MetricsModule.formatCurrency(rev, self.currency) + '<br>' +
+            '<span style="color: var(--chart-cost);">&#9632;</span> Total Cost: ' + MetricsModule.formatCurrency(cost, self.currency) + '<br>' +
+            '<strong style="color: ' + (profit >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' +
+            (profit >= 0 ? 'Profit: +' : 'Loss: ') + MetricsModule.formatCurrency(profit, self.currency) + '</strong>';
+
+          tip.innerHTML = tipHTML;
+          tip.className = '';
+
+          var chartCard = document.querySelector('.chart-container');
+          var cardRect = chartCard.getBoundingClientRect();
+
+          var tipX = clientX - cardRect.left + 15;
+          var tipY = clientY - cardRect.top - 40;
+
+          if (tipX + 160 > cardRect.width) {
+            tipX = clientX - cardRect.left - 170;
+          }
+          if (tipY < 10) tipY = 10;
+
+          tip.style.left = tipX + 'px';
+          tip.style.top = tipY + 'px';
+        }
+
+        function hideTooltip() {
+          var tracker = document.getElementById('chart-tracker-line');
+          if (tracker) tracker.setAttribute('style', 'display: none;');
+          var tip = document.getElementById('chart-tooltip');
+          if (tip) tip.className = 'hidden';
+        }
+
+        hitRect.addEventListener('mousemove', function(e) {
+          handlePointer(e.clientX, e.clientY);
+        });
+
+        hitRect.addEventListener('mouseleave', function() {
+          hideTooltip();
+        });
+
+        hitRect.addEventListener('touchmove', function(e) {
+          if (e.touches && e.touches.length > 0) {
+            handlePointer(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+
+        hitRect.addEventListener('touchend', function() {
+          hideTooltip();
+        });
+
+        container.appendChild(hitRect);
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 6: SENSITIVITY ANALYSIS MODULE
+       ========================================================================== */
+    var SensitivityModule = {
+      render: function(calc, currency, unitLabel) {
+        var tbody = document.getElementById('tbody-sensitivity');
+        tbody.innerHTML = '';
+
+        var variations = [-0.20, -0.10, 0, 0.10, 0.20];
+        var drivers = [
+          { name: 'Selling Price (P)', key: 'P' },
+          { name: 'Variable Cost per Unit (V)', key: 'V' },
+          { name: 'Fixed Costs (F)', key: 'F' }
+        ];
+
+        for (var d = 0; d < drivers.length; d++) {
+          var driver = drivers[d];
+          var tr = document.createElement('tr');
+
+          var tdName = document.createElement('td');
+          tdName.innerHTML = '<strong>' + driver.name + '</strong>';
+          tr.appendChild(tdName);
+
+          for (var v = 0; v < variations.length; v++) {
+            var pct = variations[v];
+            var factor = 1 + pct;
+
+            var adjF = driver.key === 'F' ? calc.F * factor : calc.F;
+            var adjP = driver.key === 'P' ? calc.P * factor : calc.P;
+            var adjV = driver.key === 'V' ? calc.V * factor : calc.V;
+
+            var cellCalc = model(adjF, adjP, adjV, calc.Q, calc.T);
+            var td = document.createElement('td');
+            td.className = 'num';
+
+            if (pct === 0) {
+              td.className += ' highlight-row';
+            }
+
+            if (!cellCalc.isValid) {
+              td.innerHTML = '<span style="color: var(--danger); font-size: 0.775rem;">No BE (Loss)</span>';
+            } else {
+              var beU = Math.round(cellCalc.beUnits);
+              var diff = calc.isValid ? ((cellCalc.beUnits - calc.beUnits) / calc.beUnits) * 100 : 0;
+              var diffSign = diff > 0 ? '+' : '';
+              var diffColor = diff < 0 ? 'var(--success)' : (diff > 0 ? 'var(--danger)' : 'var(--text-muted)');
+
+              var cellHTML = '<div>' + beU.toLocaleString() + ' ' + unitLabel + '</div>';
+              if (pct !== 0 && calc.isValid) {
+                cellHTML += '<div style="font-size: 0.725rem; color: ' + diffColor + ';">' + diffSign + diff.toFixed(1) + '%</div>';
+              }
+              td.innerHTML = cellHTML;
+            }
+
+            tr.appendChild(td);
+          }
+
+          tbody.appendChild(tr);
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 7: VOLUME SCENARIO MODULE
+       ========================================================================== */
+    var ScenarioModule = {
+      render: function(calc, currency, unitLabel) {
+        var tbody = document.getElementById('tbody-scenarios');
+        tbody.innerHTML = '';
+
+        var scenarios = [
+          { name: 'Pessimistic (-25% Volume)', mult: 0.75, badge: 'badge-danger' },
+          { name: 'Base Expected Volume', mult: 1.0, badge: 'badge-primary', isBase: true },
+          { name: 'Optimistic (+25% Volume)', mult: 1.25, badge: 'badge-success' }
+        ];
+
+        for (var i = 0; i < scenarios.length; i++) {
+          var sc = scenarios[i];
+          var qVal = Math.round(calc.Q * sc.mult);
+          var scCalc = model(calc.F, calc.P, calc.V, qVal, calc.T);
+
+          var tr = document.createElement('tr');
+          if (sc.isBase) tr.className = 'highlight-row';
+
+          var tdName = document.createElement('td');
+          tdName.innerHTML = '<strong>' + sc.name + '</strong>';
+          tr.appendChild(tdName);
+
+          var tdVol = document.createElement('td');
+          tdVol.className = 'num';
+          tdVol.textContent = qVal.toLocaleString() + ' ' + unitLabel;
+          tr.appendChild(tdVol);
+
+          var tdRev = document.createElement('td');
+          tdRev.className = 'num';
+          tdRev.textContent = MetricsModule.formatCurrency(scCalc.expRevenue, currency);
+          tr.appendChild(tdRev);
+
+          var tdCost = document.createElement('td');
+          tdCost.className = 'num';
+          tdCost.textContent = MetricsModule.formatCurrency(scCalc.expTotalCost, currency);
+          tr.appendChild(tdCost);
+
+          var tdProfit = document.createElement('td');
+          tdProfit.className = 'num';
+          var profColor = scCalc.expProfit > 0 ? 'var(--success)' : (scCalc.expProfit < 0 ? 'var(--danger)' : 'inherit');
+          tdProfit.innerHTML = '<strong style="color: ' + profColor + ';">' + 
+            MetricsModule.formatCurrency(scCalc.expProfit, currency) + '</strong>';
+          tr.appendChild(tdProfit);
+
+          var tdMos = document.createElement('td');
+          tdMos.className = 'num';
+          if (scCalc.isValid && scCalc.mosUnits >= 0) {
+            tdMos.textContent = Math.round(scCalc.mosUnits).toLocaleString() + ' ' + unitLabel + ' (' + (scCalc.mosRatio * 100).toFixed(1) + '%)';
+          } else if (scCalc.isValid) {
+            tdMos.innerHTML = '<span style="color: var(--danger);">' + Math.round(scCalc.mosUnits).toLocaleString() + ' ' + unitLabel + '</span>';
+          } else {
+            tdMos.textContent = 'N/A';
+          }
+          tr.appendChild(tdMos);
+
+          tbody.appendChild(tr);
+        }
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 8: WHAT-IF SENSITIVITY SLIDERS
+       ========================================================================== */
+    var WhatIfModule = {
+      baseModel: null,
+
+      onSliderChange: function() {
+        if (!this.baseModel) return;
+
+        var pPct = parseInt(document.getElementById('slider-price').value, 10);
+        var vPct = parseInt(document.getElementById('slider-var').value, 10);
+        var fPct = parseInt(document.getElementById('slider-fixed').value, 10);
+
+        var pAdj = this.baseModel.P * (1 + pPct / 100);
+        var vAdj = this.baseModel.V * (1 + vPct / 100);
+        var fAdj = this.baseModel.F * (1 + fPct / 100);
+
+        var currency = App.currentCurrency;
+        var unitLabel = App.currentUnitLabel;
+
+        document.getElementById('slider-price-val').textContent = (pPct > 0 ? '+' : '') + pPct + '% (' + MetricsModule.formatCurrency(pAdj, currency) + ')';
+        document.getElementById('slider-var-val').textContent = (vPct > 0 ? '+' : '') + vPct + '% (' + MetricsModule.formatCurrency(vAdj, currency) + ')';
+        document.getElementById('slider-fixed-val').textContent = (fPct > 0 ? '+' : '') + fPct + '% (' + MetricsModule.formatCurrency(fAdj, currency) + ')';
+
+        var whatIfModel = model(fAdj, pAdj, vAdj, this.baseModel.Q, this.baseModel.T);
+
+        var beUnitsEl = document.getElementById('whatif-be-units');
+        var beRevEl = document.getElementById('whatif-be-rev');
+        var profitEl = document.getElementById('whatif-profit');
+
+        if (!whatIfModel.isValid) {
+          beUnitsEl.textContent = 'No Break-Even (P \u2264 V)';
+          beUnitsEl.className = 'whatif-diff diff-unfavorable';
+          beRevEl.textContent = 'N/A';
+          beRevEl.className = 'whatif-diff diff-unfavorable';
+        } else {
+          var deltaUnits = whatIfModel.beUnits - this.baseModel.beUnits;
+          var signU = deltaUnits > 0 ? '+' : '';
+          var pctU = this.baseModel.beUnits > 0 ? (deltaUnits / this.baseModel.beUnits * 100).toFixed(1) : 0;
+          beUnitsEl.textContent = Math.round(whatIfModel.beUnits).toLocaleString() + ' ' + unitLabel + ' (' + signU + pctU + '%)';
+          beUnitsEl.className = 'whatif-diff ' + (deltaUnits < -0.01 ? 'diff-favorable' : (deltaUnits > 0.01 ? 'diff-unfavorable' : 'diff-neutral'));
+
+          var deltaRev = whatIfModel.beRevenue - this.baseModel.beRevenue;
+          var signR = deltaRev > 0 ? '+' : '';
+          var pctR = this.baseModel.beRevenue > 0 ? (deltaRev / this.baseModel.beRevenue * 100).toFixed(1) : 0;
+          beRevEl.textContent = MetricsModule.formatCurrency(whatIfModel.beRevenue, currency) + ' (' + signR + pctR + '%)';
+          beRevEl.className = 'whatif-diff ' + (deltaRev < -0.01 ? 'diff-favorable' : (deltaRev > 0.01 ? 'diff-unfavorable' : 'diff-neutral'));
+        }
+
+        var deltaProfit = whatIfModel.expProfit - this.baseModel.expProfit;
+        var signP = deltaProfit > 0 ? '+' : '';
+        profitEl.textContent = MetricsModule.formatCurrency(whatIfModel.expProfit, currency) + ' (' + signP + MetricsModule.formatCurrency(deltaProfit, currency) + ')';
+        profitEl.className = 'whatif-diff ' + (deltaProfit > 0.01 ? 'diff-favorable' : (deltaProfit < -0.01 ? 'diff-unfavorable' : 'diff-neutral'));
+      },
+
+      resetSliders: function() {
+        document.getElementById('slider-price').value = 0;
+        document.getElementById('slider-var').value = 0;
+        document.getElementById('slider-fixed').value = 0;
+        this.onSliderChange();
+      }
+    };
+
+
+    /* ==========================================================================
+       MODULE 9: MAIN APPLICATION CONTROLLER
+       ========================================================================== */
+    var App = {
+      currentCurrency: '$',
+      currentUnitLabel: 'units',
+      saveDebounceTimer: null,
+
+      init: function() {
+        var savedTheme = Storage.getTheme();
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        this.updateThemeIcon(savedTheme);
+
+        var self = this;
+        ApiClient.checkHealth(function(online, info) {
+          AuthModule.checkSession();
+        });
+
+        window.addEventListener('resize', function() {
+          if (self.latestCalc) {
+            ChartModule.render(self.latestCalc, self.currentCurrency, self.currentUnitLabel);
+          }
+        });
+      },
+
+      toggleTheme: function() {
+        var current = document.documentElement.getAttribute('data-theme') || 'light';
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        Storage.setTheme(next);
+        this.updateThemeIcon(next);
+        if (this.latestCalc) {
+          ChartModule.render(this.latestCalc, this.currentCurrency, this.currentUnitLabel);
+        }
+      },
+
+      updateThemeIcon: function(theme) {
+        var icon = document.getElementById('theme-icon');
+        if (icon) {
+          icon.innerHTML = theme === 'dark' ? '&#9788;' : '&#9790;';
+        }
+      },
+
+      onCurrencyChange: function() {
+        this.currentCurrency = document.getElementById('currency-select').value;
+        var symbols = document.querySelectorAll('.curr-symbol');
+        for (var i = 0; i < symbols.length; i++) {
+          symbols[i].textContent = this.currentCurrency;
+        }
+        this.recalculateAndSave();
+      },
+
+      onUnitLabelChange: function() {
+        var val = document.getElementById('unit-label-input').value.trim();
+        this.currentUnitLabel = val || 'units';
+        var unitSpans = document.querySelectorAll('.unit-text');
+        for (var i = 0; i < unitSpans.length; i++) {
+          unitSpans[i].textContent = this.currentUnitLabel;
+        }
+        this.recalculateAndSave();
+      },
+
+      loadUserInputs: function(inputs) {
+        if (!inputs) inputs = {};
+        document.getElementById('inp-fixed-costs').value = 
+          inputs.fixed_costs !== undefined ? inputs.fixed_costs : (inputs.fixedCosts !== undefined ? inputs.fixedCosts : 15000);
+        document.getElementById('inp-price').value = 
+          inputs.selling_price !== undefined ? inputs.selling_price : (inputs.sellingPrice !== undefined ? inputs.sellingPrice : 50);
+        document.getElementById('inp-variable-cost').value = 
+          inputs.variable_cost !== undefined ? inputs.variable_cost : (inputs.variableCost !== undefined ? inputs.variableCost : 20);
+        document.getElementById('inp-volume').value = 
+          inputs.expected_volume !== undefined ? inputs.expected_volume : (inputs.expectedVolume !== undefined ? inputs.expectedVolume : 800);
+        document.getElementById('inp-target-profit').value = 
+          inputs.target_profit !== undefined ? inputs.target_profit : (inputs.targetProfit !== undefined ? inputs.targetProfit : '');
+
+        this.currentCurrency = inputs.currency || '$';
+        document.getElementById('currency-select').value = this.currentCurrency;
+
+        this.currentUnitLabel = inputs.unit_label || inputs.unitLabel || 'units';
+        document.getElementById('unit-label-input').value = this.currentUnitLabel;
+
+        var symbols = document.querySelectorAll('.curr-symbol');
+        for (var i = 0; i < symbols.length; i++) {
+          symbols[i].textContent = this.currentCurrency;
+        }
+
+        var unitSpans = document.querySelectorAll('.unit-text');
+        for (var j = 0; j < unitSpans.length; j++) {
+          unitSpans[j].textContent = this.currentUnitLabel;
+        }
+
+        this.recalculate();
+      },
+
+      loadSampleData: function() {
+        document.getElementById('inp-fixed-costs').value = 12500;
+        document.getElementById('inp-price').value = 6.50;
+        document.getElementById('inp-variable-cost').value = 2.10;
+        document.getElementById('inp-volume').value = 3800;
+        document.getElementById('inp-target-profit').value = 5000;
+
+        document.getElementById('currency-select').value = '$';
+        document.getElementById('unit-label-input').value = 'cups';
+
+        ProfileModule.load({
+          firm_name: 'Velvet Bean Roastery',
+          owner_name: 'Elena Rostova',
+          business_type: 'Restaurant / Food',
+          phone: '2065550184',
+          email: 'elena@velvetbean.com',
+          address: 'Pike Place Market, Seattle, WA'
+        });
+
+        this.onCurrencyChange();
+        this.onUnitLabelChange();
+      },
+
+      resetInputs: function() {
+        document.getElementById('inp-fixed-costs').value = 10000;
+        document.getElementById('inp-price').value = 50;
+        document.getElementById('inp-variable-cost').value = 20;
+        document.getElementById('inp-volume').value = 500;
+        document.getElementById('inp-target-profit').value = '';
+        this.recalculateAndSave();
+      },
+
+      onInputChange: function() {
+        this.recalculateAndSave();
+      },
+
+      recalculateAndSave: function() {
+        this.recalculate();
+
+        var f = Number(document.getElementById('inp-fixed-costs').value) || 0;
+        var p = Number(document.getElementById('inp-price').value) || 0;
+        var v = Number(document.getElementById('inp-variable-cost').value) || 0;
+        var q = Number(document.getElementById('inp-volume').value) || 0;
+        var t = Number(document.getElementById('inp-target-profit').value) || 0;
+        var curr = this.currentCurrency;
+        var unit = this.currentUnitLabel;
+
+        // Local cache
+        if (AuthModule.currentUser) {
+          var users = Storage.getUsers();
+          if (users[AuthModule.currentUser.email]) {
+            users[AuthModule.currentUser.email].inputs = {
+              fixedCosts: f,
+              sellingPrice: p,
+              variableCost: v,
+              expectedVolume: q,
+              targetProfit: t,
+              currency: curr,
+              unitLabel: unit
+            };
+            Storage.saveUsers(users);
+          }
+        }
+
+        // Debounced sync to backend
+        if (ApiClient.isBackendAvailable) {
+          var badge = document.getElementById('sync-status-badge');
+          if (badge) {
+            badge.textContent = 'Saving...';
+            badge.className = 'badge badge-warning';
+          }
+
+          if (this.saveDebounceTimer) clearTimeout(this.saveDebounceTimer);
+          this.saveDebounceTimer = setTimeout(function() {
+            ApiClient.request('POST', '/inputs', {
+              fixed_costs: f,
+              selling_price: p,
+              variable_cost: v,
+              expected_volume: q,
+              target_profit: t,
+              currency: curr,
+              unit_label: unit
+            }, function(err) {
+              if (badge) {
+                badge.textContent = err ? 'Sync Error' : 'Auto-Saved';
+                badge.className = err ? 'badge badge-danger' : 'badge badge-primary';
+              }
+            });
+          }, 350);
+        }
+      },
+
+      recalculate: function() {
+        var F = Number(document.getElementById('inp-fixed-costs').value) || 0;
+        var P = Number(document.getElementById('inp-price').value) || 0;
+        var V = Number(document.getElementById('inp-variable-cost').value) || 0;
+        var Q = Number(document.getElementById('inp-volume').value) || 0;
+        var T = Number(document.getElementById('inp-target-profit').value) || 0;
+
+        var calc = model(F, P, V, Q, T);
+        this.latestCalc = calc;
+
+        MetricsModule.render(calc, this.currentCurrency, this.currentUnitLabel);
+        ChartModule.render(calc, this.currentCurrency, this.currentUnitLabel);
+        SensitivityModule.render(calc, this.currentCurrency, this.currentUnitLabel);
+        ScenarioModule.render(calc, this.currentCurrency, this.currentUnitLabel);
+
+        WhatIfModule.baseModel = calc;
+        WhatIfModule.onSliderChange();
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      App.init();
+    });
+  </script>
+</body>
+</html>
