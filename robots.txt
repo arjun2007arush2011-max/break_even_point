@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://arjun2007arush2011-max.github.io/break_even_point/sitemap.xml
