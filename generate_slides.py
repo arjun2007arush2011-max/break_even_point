@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
-Generates PowerPoint (PPTX) and PDF presentation slides with embedded screenshots
-and dedicated Frontend & Backend architecture slides for the college mini-project.
+Generates PowerPoint (PPTX) and PDF presentation slides for the College Mini-Project:
+Break-Even Point Predictor & Feasibility Engine.
+Features:
+- Unified Full-Stack Architecture slide displaying both Frontend and Backend together on the SAME slide.
+- Embedded live screenshots.
+- Exactly 7 slides covering the full academic project lifecycle.
 """
 
 import sys
@@ -42,7 +46,7 @@ C_ACCENT = RGBColor(124, 58, 237)      # #7c3aed Purple
 C_WHITE = RGBColor(255, 255, 255)
 
 # ==============================================================================
-# 1. PPTX GENERATION WITH SCREENSHOTS & SPECIALIZED SLIDES
+# 1. PPTX GENERATION (7 SLIDES WITH FRONTEND & BACKEND ON SAME SLIDE)
 # ==============================================================================
 def create_pptx():
     prs = Presentation()
@@ -78,7 +82,7 @@ def create_pptx():
         return shape
 
     # --------------------------------------------------------------------------
-    # SLIDE 1: Title Slide (With UI Preview)
+    # SLIDE 1: Title & Project Overview (With Live Preview)
     # --------------------------------------------------------------------------
     slide1 = prs.slides.add_slide(blank_layout)
     add_card(slide1, Inches(0.8), Inches(0.8), Inches(11.733), Inches(5.9), C_LIGHT_BG, C_PRIMARY)
@@ -106,7 +110,6 @@ def create_pptx():
     p2.font.color.rgb = C_MUTED
     p2.space_before = Pt(4)
 
-    # Left metadata card
     m_card = add_card(slide1, Inches(1.2), Inches(3.6), Inches(5.8), Inches(2.7), C_WHITE)
     tf_m = m_card.text_frame
     tf_m.word_wrap = True
@@ -133,12 +136,11 @@ def create_pptx():
         p.font.color.rgb = C_DARK
         p.space_before = Pt(3)
 
-    # Right side: Screenshot of the live app
     if os.path.exists(SCREENSHOT_DASH):
         slide1.shapes.add_picture(SCREENSHOT_DASH, Inches(7.3), Inches(1.4), Inches(4.8), Inches(4.8))
 
     # --------------------------------------------------------------------------
-    # SLIDE 2: Problem Statement & Objectives
+    # SLIDE 2: Problem Statement & Project Objectives
     # --------------------------------------------------------------------------
     slide2 = prs.slides.add_slide(blank_layout)
     add_header(slide2, "Problem Statement & Project Objectives", "BACKGROUND & MOTIVATION")
@@ -195,51 +197,106 @@ def create_pptx():
         p.space_before = Pt(8)
 
     # --------------------------------------------------------------------------
-    # SLIDE 3: Frontend Architecture & User Interface (With Screenshot)
+    # SLIDE 3: UNIFIED FULL-STACK ARCHITECTURE (FRONTEND & BACKEND ON SAME SLIDE!)
     # --------------------------------------------------------------------------
     slide3 = prs.slides.add_slide(blank_layout)
-    add_header(slide3, "Frontend Architecture & User Interface", "FRONTEND TIER")
+    add_header(slide3, "Full-Stack System Architecture: Frontend & Backend", "SYSTEM ARCHITECTURE")
 
-    # Left: Explanation
-    c3_l = add_card(slide3, Inches(0.8), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
+    # Top Left Card: Frontend Client Tier
+    c3_l = add_card(slide3, Inches(0.8), Inches(1.5), Inches(5.7), Inches(3.95), C_WHITE)
     tf3_l = c3_l.text_frame
     tf3_l.word_wrap = True
-    tf3_l.margin_left = Inches(0.3)
-    tf3_l.margin_top = Inches(0.3)
+    tf3_l.margin_left = Inches(0.25)
+    tf3_l.margin_top = Inches(0.2)
 
     h3_l = tf3_l.paragraphs[0]
-    h3_l.text = "FRONTEND DESIGN & USER EXPERIENCE"
+    h3_l.text = "FRONTEND CLIENT TIER (Browser)"
     h3_l.font.size = Pt(12)
     h3_l.font.bold = True
     h3_l.font.color.rgb = C_PRIMARY
 
     f_points = [
-        ("Vanilla ES5 Architecture:", "Strict ES5 standards ensuring 100% universal browser compatibility without Babel or bundling overhead."),
-        ("Responsive Two-Column Layout:", "Adapts automatically from a two-column desktop grid to an optimized single-column mobile view."),
-        ("Dark & Light Mode:", "Managed via CSS custom properties with persistent preference saved in localStorage."),
-        ("Client-Side SHA-256 Hashing:", "Passwords hashed via browser Web Crypto API (crypto.subtle) before storage with pure JS fallback."),
-        ("Modular Namespaces:", "Clear separation of concerns across AuthModule, ProfileModule, MetricsModule, ChartModule, and ApiClient.")
+        ("Vanilla ES5 Standards:", "Zero build pipelines, npm, or Babel. Operates natively in 100% of web browsers."),
+        ("Responsive CSS Grid:", "Two-column analytical dashboard adapting smoothly to single-column mobile viewports."),
+        ("Dark & Light Mode Engine:", "CSS Custom Properties with persistent user theme saved in localStorage."),
+        ("Client-Side Cryptography:", "Web Crypto API (crypto.subtle) SHA-256 password hashing with pure JS fallback."),
+        ("Modular Namespaces:", "Separation of concerns: AuthModule, ProfileModule, MetricsModule, ChartModule, ApiClient.")
     ]
     for title, desc in f_points:
         p = tf3_l.add_paragraph()
-        p.text = title
-        p.font.size = Pt(10.5)
+        p.text = f"• {title} "
+        p.font.size = Pt(9.5)
         p.font.bold = True
         p.font.color.rgb = C_DARK
-        p.space_before = Pt(6)
+        p.space_before = Pt(3)
 
-        p_b = tf3_l.add_paragraph()
-        p_b.text = f"  {desc}"
-        p_b.font.size = Pt(9.5)
-        p_b.font.color.rgb = C_MUTED
-        p_b.space_before = Pt(1)
+        p_desc = tf3_l.paragraphs[-1]
+        run_desc = p_desc.add_run()
+        run_desc.text = desc
+        run_desc.font.bold = False
+        run_desc.font.color.rgb = C_MUTED
 
-    # Right: Login & UI Screenshot
-    if os.path.exists(SCREENSHOT_LOGIN):
-        slide3.shapes.add_picture(SCREENSHOT_LOGIN, Inches(6.9), Inches(1.6), Inches(5.6), Inches(5.1))
+    # Top Right Card: Backend Server & Database Tier
+    c3_r = add_card(slide3, Inches(6.8), Inches(1.5), Inches(5.7), Inches(3.95), C_WHITE)
+    tf3_r = c3_r.text_frame
+    tf3_r.word_wrap = True
+    tf3_r.margin_left = Inches(0.25)
+    tf3_r.margin_top = Inches(0.2)
+
+    h3_r = tf3_r.paragraphs[0]
+    h3_r.text = "BACKEND SERVER & DATABASE TIER"
+    h3_r.font.size = Pt(12)
+    h3_r.font.bold = True
+    h3_r.font.color.rgb = C_SUCCESS
+
+    b_points = [
+        ("Triple-Runtime Implementations:", "Native Python 3 (http.server), Ruby (WEBrick), and Node.js. Zero pip/npm dependencies."),
+        ("Universal Launcher (start.sh):", "Intelligently auto-detects the host system's installed runtime and binds on port 8000."),
+        ("Relational SQLite3 Database:", "Structured breakeven.db with normalized schemas for users, profiles, and inputs."),
+        ("RESTful JSON API Contract:", "Endpoints for /api/auth/signup, /api/auth/login, /api/profile, /api/inputs, /api/calculate."),
+        ("Server Mathematical Validation:", "Performs secondary verification of break-even formulas to enforce data integrity.")
+    ]
+    for title, desc in b_points:
+        p = tf3_r.add_paragraph()
+        p.text = f"• {title} "
+        p.font.size = Pt(9.5)
+        p.font.bold = True
+        p.font.color.rgb = C_DARK
+        p.space_before = Pt(3)
+
+        p_desc = tf3_r.paragraphs[-1]
+        run_desc = p_desc.add_run()
+        run_desc.text = desc
+        run_desc.font.bold = False
+        run_desc.font.color.rgb = C_MUTED
+
+    # Bottom Full-Width Card: Communication Protocol & Dual Sync Bridge
+    c3_b = add_card(slide3, Inches(0.8), Inches(5.6), Inches(11.7), Inches(1.4), C_LIGHT_BG, C_ACCENT)
+    tf3_b = c3_b.text_frame
+    tf3_b.word_wrap = True
+    tf3_b.margin_left = Inches(0.3)
+    tf3_b.margin_top = Inches(0.15)
+
+    h3_b = tf3_b.paragraphs[0]
+    h3_b.text = "REST API PROTOCOL & RESILIENT DUAL-ENGINE SYNCHRONIZATION BRIDGE (Frontend ⟷ Backend)"
+    h3_b.font.size = Pt(11)
+    h3_b.font.bold = True
+    h3_b.font.color.rgb = C_ACCENT
+
+    p_sync1 = tf3_b.add_paragraph()
+    p_sync1.text = "• Debounced REST Sync: Client debounces user input (300ms) and dispatches JSON payloads with Bearer auth headers (Authorization: Bearer <token>) to /api/inputs and /api/profile."
+    p_sync1.font.size = Pt(9)
+    p_sync1.font.color.rgb = C_DARK
+    p_sync1.space_before = Pt(2)
+
+    p_sync2 = tf3_b.add_paragraph()
+    p_sync2.text = "• Resilient Dual Persistence: ApiClient probes /api/health. If server is active, data saves to SQLite3; if offline or hosted on GitHub Pages (file://), it gracefully falls back to localStorage with zero downtime."
+    p_sync2.font.size = Pt(9)
+    p_sync2.font.color.rgb = C_DARK
+    p_sync2.space_before = Pt(2)
 
     # --------------------------------------------------------------------------
-    # SLIDE 4: Interactive SVG Chart & Visualization Engine (With Chart Screenshot)
+    # SLIDE 4: Interactive SVG Chart & Visualization Engine
     # --------------------------------------------------------------------------
     slide4 = prs.slides.add_slide(blank_layout)
     add_header(slide4, "Interactive SVG Chart & Visualization Engine", "VISUALIZATION ENGINE")
@@ -285,10 +342,10 @@ def create_pptx():
         p_b.space_before = Pt(1)
 
     # --------------------------------------------------------------------------
-    # SLIDE 5: Backend Architecture & REST API (Dedicated Backend Slide)
+    # SLIDE 5: Mathematical Formulation & Core Financial Algorithms
     # --------------------------------------------------------------------------
     slide5 = prs.slides.add_slide(blank_layout)
-    add_header(slide5, "Backend Architecture, REST APIs & SQLite3", "BACKEND & DATABASE")
+    add_header(slide5, "Mathematical Formulation & Core Financial Algorithms", "FINANCIAL MODEL & ALGORITHMS")
 
     c5_l = add_card(slide5, Inches(0.8), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
     tf5_l = c5_l.text_frame
@@ -297,31 +354,27 @@ def create_pptx():
     tf5_l.margin_top = Inches(0.3)
 
     h5_l = tf5_l.paragraphs[0]
-    h5_l.text = "TRIPLE-RUNTIME BACKEND SERVERS"
+    h5_l.text = "CORE BREAK-EVEN EQUATIONS"
     h5_l.font.size = Pt(12)
     h5_l.font.bold = True
     h5_l.font.color.rgb = C_PRIMARY
 
-    b_pts = [
-        ("Python 3 Server (server.py):", "Built with native http.server and sqlite3. Zero pip packages required."),
-        ("Ruby Server (server.rb):", "Built with WEBrick and native sqlite3 gem. Zero bundler/gem installs needed."),
-        ("Node.js Server (server.js):", "Built with standard http, crypto, and fs modules."),
-        ("Universal Launcher (start.sh):", "Auto-detects which runtime is installed on the host and starts on port 8000."),
-        ("Relational SQLite Database (breakeven.db):", "Structured schemas for Users (with SHA-256 tokens), Business Profiles, and Cost Inputs.")
+    math_eqs = [
+        ("Contribution Margin (CM):", "CM = Selling Price (P) - Variable Cost (V)"),
+        ("Contribution Margin Ratio:", "CM% = (P - V) / P"),
+        ("Break-Even Volume (Units):", "Q_BE = Fixed Costs (F) / (P - V)"),
+        ("Break-Even Sales Revenue:", "R_BE = Q_BE × P = F / CM%"),
+        ("Net Operating Profit:", "Profit = Q × (P - V) - F"),
+        ("Margin of Safety (MOS):", "MOS = (Q - Q_BE) / Q × 100%"),
+        ("Degree of Operating Leverage:", "DOL = (Q × CM) / Profit"),
+        ("Target Profit Units:", "Q_Target = (F + Target) / CM")
     ]
-    for title, desc in b_pts:
+    for title, formula in math_eqs:
         p = tf5_l.add_paragraph()
-        p.text = title
-        p.font.size = Pt(10.5)
-        p.font.bold = True
+        p.text = f"{title} {formula}"
+        p.font.size = Pt(9.5)
         p.font.color.rgb = C_DARK
-        p.space_before = Pt(6)
-
-        p_b = tf5_l.add_paragraph()
-        p_b.text = f"  {desc}"
-        p_b.font.size = Pt(9.5)
-        p_b.font.color.rgb = C_MUTED
-        p_b.space_before = Pt(1)
+        p.space_before = Pt(4)
 
     c5_r = add_card(slide5, Inches(6.9), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
     tf5_r = c5_r.text_frame
@@ -330,44 +383,36 @@ def create_pptx():
     tf5_r.margin_top = Inches(0.3)
 
     h5_r = tf5_r.paragraphs[0]
-    h5_r.text = "REST API CONTRACT & PERSISTENCE FLOW"
+    h5_r.text = "ALGORITHMIC GUARDS & INTEGRITY CHECKS"
     h5_r.font.size = Pt(12)
     h5_r.font.bold = True
     h5_r.font.color.rgb = C_SUCCESS
 
-    apis = [
-        ("POST /api/auth/signup", "Registers user, hashes password, seeds default profile & inputs."),
-        ("POST /api/auth/login", "Authenticates credentials and returns a 24-byte bearer token."),
-        ("GET /api/auth/me", "Validates session token and returns user profile & inputs."),
-        ("GET & POST /api/profile", "Retrieves and updates business metadata in SQLite3."),
-        ("GET & POST /api/inputs", "Persists cost drivers with debounced client auto-saving."),
-        ("POST /api/calculate", "Server-side verification of mathematical break-even model.")
+    guards = [
+        ("Structural Loss Detection (P ≤ V):", "Instantly flags when price does not exceed variable costs. Prevents division-by-zero exceptions and alerts that every unit sold widens net deficit."),
+        ("Sub-Break-Even Operating Alert:", "Dynamically signals danger when planned sales volume Q < Q_BE, detailing the precise unit deficit required to achieve solvency."),
+        ("Precision Floating-Point Normalization:", "Sanitizes user currency entries and eliminates IEEE 754 floating-point inaccuracies through explicit rounding rules."),
+        ("Client-Server Calculation Parity:", "Validates client results against backend /api/calculate endpoints to guarantee consistent cross-platform mathematical output.")
     ]
-    for ep, desc in apis:
+    for title, desc in guards:
         p = tf5_r.add_paragraph()
-        p.text = f"• {ep}: {desc}"
-        p.font.size = Pt(9.5)
+        p.text = f"✔ {title}"
+        p.font.size = Pt(10.5)
+        p.font.bold = True
         p.font.color.rgb = C_DARK
-        p.space_before = Pt(5)
+        p.space_before = Pt(6)
 
-    p_d = tf5_r.add_paragraph()
-    p_d.text = "Dual-Engine Resilience Logic:"
-    p_d.font.size = Pt(10.5)
-    p_d.font.bold = True
-    p_d.font.color.rgb = C_ACCENT
-    p_d.space_before = Pt(8)
-
-    p_dd = tf5_r.add_paragraph()
-    p_dd.text = "The ApiClient probes /api/health. If connected, data writes to SQLite3; if the server is offline or opened as file://, it gracefully falls back to localStorage."
-    p_dd.font.size = Pt(9)
-    p_dd.font.color.rgb = C_MUTED
-    p_dd.space_before = Pt(1)
+        p_b = tf5_r.add_paragraph()
+        p_b.text = f"  {desc}"
+        p_b.font.size = Pt(9.5)
+        p_b.font.color.rgb = C_MUTED
+        p_b.space_before = Pt(1)
 
     # --------------------------------------------------------------------------
-    # SLIDE 6: Mathematical Model & What-If Simulations
+    # SLIDE 6: What-If Sensitivity Simulations & Scenario Planning
     # --------------------------------------------------------------------------
     slide6 = prs.slides.add_slide(blank_layout)
-    add_header(slide6, "Mathematical Model & What-If Simulations", "ANALYTICS ENGINE")
+    add_header(slide6, "What-If Sensitivity Simulations & Scenario Planning", "SIMULATION & SENSITIVITY")
 
     c6_l = add_card(slide6, Inches(0.8), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
     tf6_l = c6_l.text_frame
@@ -376,27 +421,30 @@ def create_pptx():
     tf6_l.margin_top = Inches(0.3)
 
     h6_l = tf6_l.paragraphs[0]
-    h6_l.text = "FINANCIAL MODEL EQUATIONS"
+    h6_l.text = "REAL-TIME WHAT-IF SLIDERS"
     h6_l.font.size = Pt(12)
     h6_l.font.bold = True
     h6_l.font.color.rgb = C_PRIMARY
 
-    math_eqs = [
-        ("Contribution Margin (CM):", "CM = Selling Price (P) - Variable Cost (V)"),
-        ("Contribution Margin Ratio:", "CM% = (P - V) / P"),
-        ("Break-Even Volume (Units):", "Q_BE = Fixed Costs (F) / (P - V)"),
-        ("Break-Even Revenue:", "R_BE = Q_BE × P = F / CM%"),
-        ("Net Operating Profit:", "Profit = Q × (P - V) - F"),
-        ("Margin of Safety (MOS):", "MOS = (Q - Q_BE) / Q × 100%"),
-        ("Degree of Operating Leverage:", "DOL = (Q × CM) / Profit"),
-        ("Target Profit Units:", "Q_Target = (F + Target) / CM")
+    slider_pts = [
+        ("Bidirectional Sliders (-50% to +50%):", "Instant continuous adjustment of Selling Price, Variable Cost, and Fixed Costs."),
+        ("Live Delta & Variance Badges:", "Computes real-time percentage shifts and absolute monetary changes against base parameters."),
+        ("Immediate Visual Curve Morphing:", "Recalculates the SVG graph at 60fps, visually shifting the intersection point along the volume axis."),
+        ("One-Click Baseline Restoration:", "Resets all simulation parameters back to saved user baselines without page reloads.")
     ]
-    for title, formula in math_eqs:
+    for title, desc in slider_pts:
         p = tf6_l.add_paragraph()
-        p.text = f"{title} {formula}"
-        p.font.size = Pt(9.5)
+        p.text = title
+        p.font.size = Pt(10.5)
+        p.font.bold = True
         p.font.color.rgb = C_DARK
-        p.space_before = Pt(4)
+        p.space_before = Pt(6)
+
+        p_b = tf6_l.add_paragraph()
+        p_b.text = f"  {desc}"
+        p_b.font.size = Pt(9.5)
+        p_b.font.color.rgb = C_MUTED
+        p_b.space_before = Pt(1)
 
     c6_r = add_card(slide6, Inches(6.9), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
     tf6_r = c6_r.text_frame
@@ -405,16 +453,16 @@ def create_pptx():
     tf6_r.margin_top = Inches(0.3)
 
     h6_r = tf6_r.paragraphs[0]
-    h6_r.text = "WHAT-IF SIMULATIONS & STRESS MATRICES"
+    h6_r.text = "STRESS TESTING & REPORT GENERATION"
     h6_r.font.size = Pt(12)
     h6_r.font.bold = True
     h6_r.font.color.rgb = C_SUCCESS
 
     sims = [
-        ("Real-Time What-If Sliders:", "Dual-direction sliders (-50% to +50%) for Price, Var Cost, and Fixed Costs compute live variances versus baseline."),
-        ("Sensitivity Matrix Table:", "Evaluates Required BE Units when each driver shifts by -20%, -10%, 0%, +10%, and +20%."),
-        ("Volume Scenario Table:", "Projects outcomes under Pessimistic (-25% volume), Expected Base, and Optimistic (+25% volume) market conditions."),
-        ("Automated Feasibility Guards:", "Immediately detects and warns if Price ≤ Variable Cost (structural loss condition) or if planned volume Q < Q_BE.")
+        ("5-Tier Sensitivity Matrix Table:", "Evaluates Required BE Units when each driver shifts by -20%, -10%, 0%, +10%, and +20%."),
+        ("Volume Scenario Forecasting:", "Projects outcomes under Pessimistic (-25% volume), Expected Base, and Optimistic (+25% volume) market conditions."),
+        ("Executive Printable Report:", "Dedicated @media print layout produces clean, investor-ready PDF summaries with corporate letterheads."),
+        ("Decision Support Warnings:", "Alerts decision-makers when fixed costs exceed safe coverage thresholds.")
     ]
     for title, desc in sims:
         p = tf6_r.add_paragraph()
@@ -495,11 +543,11 @@ def create_pptx():
         p_b.space_before = Pt(1)
 
     prs.save(PPTX_PATH)
-    print(f"[OK] Enhanced PowerPoint with screenshots generated at: {PPTX_PATH}")
+    print(f"[OK] Enhanced PowerPoint (7 slides with unified Frontend & Backend) generated at: {PPTX_PATH}")
 
 
 # ==============================================================================
-# 2. PDF PRESENTATION GENERATION WITH EMBEDDED SCREENSHOTS
+# 2. PDF PRESENTATION GENERATION (MATCHING 7-SLIDE DECK)
 # ==============================================================================
 def create_pdf():
     doc = SimpleDocTemplate(
@@ -520,13 +568,13 @@ def create_pdf():
     )
     style_title = ParagraphStyle(
         'TitleStyle', parent=styles['Heading1'],
-        fontName='Helvetica-Bold', fontSize=19, leading=23,
-        textColor=colors.HexColor('#0f172a'), spaceAfter=10
+        fontName='Helvetica-Bold', fontSize=18, leading=22,
+        textColor=colors.HexColor('#0f172a'), spaceAfter=8
     )
     style_card_title = ParagraphStyle(
         'CardTStyle', parent=styles['Heading2'],
         fontName='Helvetica-Bold', fontSize=11, leading=14,
-        textColor=colors.HexColor('#2563eb'), spaceAfter=5
+        textColor=colors.HexColor('#2563eb'), spaceAfter=4
     )
     style_card_title_green = ParagraphStyle('CGStyle', parent=style_card_title, textColor=colors.HexColor('#059669'))
     style_card_title_purple = ParagraphStyle('CPStyle', parent=style_card_title, textColor=colors.HexColor('#7c3aed'))
@@ -534,8 +582,8 @@ def create_pdf():
 
     style_body = ParagraphStyle(
         'BodyDStyle', parent=styles['Normal'],
-        fontName='Helvetica', fontSize=9, leading=13,
-        textColor=colors.HexColor('#0f172a'), spaceAfter=4
+        fontName='Helvetica', fontSize=8.5, leading=12,
+        textColor=colors.HexColor('#0f172a'), spaceAfter=3
     )
     style_body_muted = ParagraphStyle('BodyMStyle', parent=style_body, textColor=colors.HexColor('#64748b'))
 
@@ -544,16 +592,16 @@ def create_pdf():
         t.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor(bg_color)),
             ('BOX', (0,0), (-1,-1), 1, colors.HexColor(border_color)),
-            ('LEFTPADDING', (0,0), (-1,-1), 12),
-            ('RIGHTPADDING', (0,0), (-1,-1), 12),
-            ('TOPPADDING', (0,0), (-1,-1), 10),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+            ('LEFTPADDING', (0,0), (-1,-1), 10),
+            ('RIGHTPADDING', (0,0), (-1,-1), 10),
+            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
         ]))
         return t
 
     story = []
 
-    # Slide 1: Title (with Dashboard Screenshot)
+    # Slide 1: Title & Overview (with Dashboard Screenshot)
     story.append(Paragraph("COLLEGE MINI PROJECT PRESENTATION", style_cat))
     story.append(Paragraph("Break-Even Point Predictor & Feasibility Engine", style_title))
     
@@ -591,19 +639,38 @@ def create_pdf():
     story.append(Table([[make_card(s2_l), make_card(s2_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
     story.append(PageBreak())
 
-    # Slide 3: Frontend Architecture & UI Screenshot
-    story.append(Paragraph("FRONTEND TIER", style_cat))
-    story.append(Paragraph("Frontend Architecture & User Interface Design", style_title))
-    s3_l = [
-        Paragraph("UI DESIGN & ARCHITECTURE", style_card_title),
-        Paragraph("• <b>Vanilla ES5 Standard:</b> Ensures 100% universal browser compatibility without build pipelines.", style_body),
-        Paragraph("• <b>Responsive Two-Column Layout:</b> Smoothly adapts between desktop and mobile screens.", style_body),
-        Paragraph("• <b>Dark / Light Themes:</b> Powered by CSS Custom Properties with persistent storage.", style_body),
-        Paragraph("• <b>Client-Side SHA-256 Hashing:</b> Passwords hashed via crypto.subtle before storage or transmission.", style_body),
-        Paragraph("• <b>Clean Modular Objects:</b> AuthModule, ProfileModule, MetricsModule, ChartModule, and ApiClient.", style_body)
+    # Slide 3: Full-Stack Architecture (Frontend and Backend on the SAME slide!)
+    story.append(Paragraph("SYSTEM ARCHITECTURE", style_cat))
+    story.append(Paragraph("Full-Stack System Architecture: Frontend & Backend", style_title))
+    
+    s3_front = [
+        Paragraph("FRONTEND CLIENT TIER (Browser)", style_card_title),
+        Paragraph("• <b>Vanilla ES5 Standard:</b> 100% universal compatibility across all browser engines without build steps or Babel.", style_body),
+        Paragraph("• <b>Responsive Two-Column Grid:</b> Adapts smoothly from desktop to mobile screens.", style_body),
+        Paragraph("• <b>Dark / Light Theming:</b> Driven by CSS Custom Properties with localStorage persistence.", style_body),
+        Paragraph("• <b>Client-Side Crypto:</b> Passwords hashed via crypto.subtle (SHA-256) prior to storage.", style_body),
+        Paragraph("• <b>Modular Namespaces:</b> AuthModule, ProfileModule, MetricsModule, ChartModule, ApiClient.", style_body)
     ]
-    img_login = RLImage(SCREENSHOT_LOGIN, width=340, height=270) if os.path.exists(SCREENSHOT_LOGIN) else Paragraph("Login UI", style_body)
-    story.append(Table([[make_card(s3_l), img_login]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
+    s3_back = [
+        Paragraph("BACKEND SERVER & DATABASE TIER", style_card_title_green),
+        Paragraph("• <b>Triple-Runtime Servers:</b> Python 3 (http.server), Ruby (WEBrick), and Node.js. Zero pip/npm dependencies.", style_body),
+        Paragraph("• <b>Universal Launcher (start.sh):</b> Auto-detects installed runtime and binds port 8000.", style_body),
+        Paragraph("• <b>SQLite3 Database (breakeven.db):</b> Tables for Users, Profiles, and Cost Inputs.", style_body),
+        Paragraph("• <b>REST API Contracts:</b> Endpoints for /api/auth/*, /api/profile, /api/inputs, /api/calculate.", style_body),
+        Paragraph("• <b>Server Mathematical Verification:</b> Confirms calculation parity with client engine.", style_body)
+    ]
+    s3_bridge = [
+        Paragraph("COMMUNICATION PROTOCOL & RESILIENT DUAL-SYNC BRIDGE (Frontend ⟷ Backend)", style_card_title_purple),
+        Paragraph("• <b>Debounced REST API Sync:</b> Client debounces user inputs (300ms) and sends JSON payloads with Bearer token authentication to /api/inputs and /api/profile.", style_body),
+        Paragraph("• <b>Dual Persistence Resilience:</b> ApiClient pings /api/health. When server is active, records persist to SQLite3; if offline or on GitHub Pages (file://), it gracefully falls back to localStorage with zero downtime.", style_body)
+    ]
+    
+    top_table = Table([[make_card(s3_front, width=340), make_card(s3_back, width=340)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')])
+    bot_table = Table([[make_card(s3_bridge, width=700, bg_color='#f8fafc', border_color='#7c3aed')]], colWidths=[720], style=[('VALIGN', (0,0), (-1,-1), 'TOP')])
+    
+    story.append(top_table)
+    story.append(Spacer(1, 6))
+    story.append(bot_table)
     story.append(PageBreak())
 
     # Slide 4: Interactive SVG Chart
@@ -621,54 +688,51 @@ def create_pdf():
     story.append(Table([[img_chart, make_card(s4_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
     story.append(PageBreak())
 
-    # Slide 5: Backend Architecture (Dedicated Backend Slide)
-    story.append(Paragraph("BACKEND & DATABASE", style_cat))
-    story.append(Paragraph("Backend Architecture, REST APIs & SQLite3 Storage", style_title))
+    # Slide 5: Mathematical Formulation & Financial Algorithms
+    story.append(Paragraph("FINANCIAL MODEL & ALGORITHMS", style_cat))
+    story.append(Paragraph("Mathematical Formulation & Financial Algorithms", style_title))
     s5_l = [
-        Paragraph("TRIPLE RUNTIME BACKEND IMPLEMENTATION", style_card_title),
-        Paragraph("• <b>Python 3 Backend (server.py):</b> Built with native http.server and sqlite3. Zero external pip packages.", style_body),
-        Paragraph("• <b>Ruby Backend (server.rb):</b> Built with WEBrick and native sqlite3 gem. Zero external dependencies.", style_body),
-        Paragraph("• <b>Node.js Backend (server.js):</b> Native http and crypto standard library.", style_body),
-        Paragraph("• <b>Auto-Launcher (start.sh):</b> Automatically detects available runtime and launches on port 8000.", style_body),
-        Paragraph("• <b>SQLite Database (breakeven.db):</b> Tables for Users, Profiles, and Cost Inputs.", style_body)
+        Paragraph("CORE ACCOUNTING FORMULAS", style_card_title),
+        Paragraph("• <b>Contribution Margin (CM):</b> CM = Selling Price (P) - Variable Cost (V)", style_body),
+        Paragraph("• <b>Contribution Margin Ratio:</b> CM% = (P - V) / P", style_body),
+        Paragraph("• <b>Break-Even Volume:</b> Q_BE = Fixed Costs (F) / (P - V)", style_body),
+        Paragraph("• <b>Break-Even Revenue:</b> R_BE = Q_BE × P = F / CM%", style_body),
+        Paragraph("• <b>Net Operating Profit:</b> Profit = Q × (P - V) - F", style_body),
+        Paragraph("• <b>Margin of Safety (MOS):</b> MOS = (Q - Q_BE) / Q × 100%", style_body),
+        Paragraph("• <b>Operating Leverage (DOL):</b> DOL = (Q × CM) / Profit", style_body),
+        Paragraph("• <b>Target Profit Units:</b> Q_Target = (F + Target) / CM", style_body)
     ]
     s5_r = [
-        Paragraph("REST API CONTRACT & DUAL SYNC", style_card_title_green),
-        Paragraph("• <b>POST /api/auth/signup & login:</b> SHA-256 auth returning 24-byte bearer tokens.", style_body),
-        Paragraph("• <b>GET /api/auth/me:</b> Validates bearer session and returns profile & inputs.", style_body),
-        Paragraph("• <b>GET & POST /api/profile:</b> SQLite3 persistence for business letterhead details.", style_body),
-        Paragraph("• <b>GET & POST /api/inputs:</b> Persists cost drivers with debounced auto-saving.", style_body),
-        Paragraph("• <b>POST /api/calculate:</b> Server-side model calculation verification.", style_body),
-        Paragraph("• <b>Dual-Engine Synchronization:</b> Probes /api/health; if online, syncs with SQLite3; if offline, operates via localStorage seamlessly.", style_body)
+        Paragraph("ALGORITHMIC GUARDS & INTEGRITY", style_card_title_green),
+        Paragraph("✔ <b>Structural Loss Detection (P ≤ V):</b> Instantly alerts if price is less than or equal to variable cost. Prevents division-by-zero exceptions.", style_body),
+        Paragraph("✔ <b>Sub-Break-Even Operating Alert:</b> Dynamically signals financial danger when planned sales volume Q < Q_BE.", style_body),
+        Paragraph("✔ <b>Floating-Point Normalization:</b> Sanitizes user numeric inputs and eliminates IEEE 754 floating-point inaccuracies.", style_body),
+        Paragraph("✔ <b>Server Verification Parity:</b> Backend /api/calculate endpoint independently validates mathematical formulas.", style_body)
     ]
     story.append(Table([[make_card(s5_l), make_card(s5_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
     story.append(PageBreak())
 
-    # Slide 6: Mathematical Model & Simulations
-    story.append(Paragraph("ANALYTICS ENGINE", style_cat))
-    story.append(Paragraph("Mathematical Model & What-If Simulations", style_title))
+    # Slide 6: What-If Sensitivity Simulations & Scenario Planning
+    story.append(Paragraph("SIMULATION & SENSITIVITY", style_cat))
+    story.append(Paragraph("What-If Sensitivity Simulations & Scenario Planning", style_title))
     s6_l = [
-        Paragraph("CORE ACCOUNTING FORMULAS", style_card_title),
-        Paragraph("• <b>Contribution Margin (CM):</b> CM = P - V", style_body),
-        Paragraph("• <b>Contribution Margin Ratio:</b> CM% = (P - V) / P", style_body),
-        Paragraph("• <b>Break-Even Volume:</b> Q_BE = F / (P - V)", style_body),
-        Paragraph("• <b>Break-Even Revenue:</b> R_BE = Q_BE × P", style_body),
-        Paragraph("• <b>Net Operating Profit:</b> Profit = Q × (P - V) - F", style_body),
-        Paragraph("• <b>Margin of Safety:</b> MOS = (Q - Q_BE) / Q × 100%", style_body),
-        Paragraph("• <b>Operating Leverage:</b> DOL = (Q × CM) / Profit", style_body),
-        Paragraph("• <b>Target Profit Units:</b> Q_Target = (F + Target) / CM", style_body)
+        Paragraph("REAL-TIME WHAT-IF SLIDERS", style_card_title),
+        Paragraph("• <b>Bidirectional Sliders (-50% to +50%):</b> Instant adjustment of Price, Variable Cost, and Fixed Costs.", style_body),
+        Paragraph("• <b>Live Variance Badges:</b> Computes real-time percentage shifts and monetary changes against base parameters.", style_body),
+        Paragraph("• <b>Real-Time SVG Morphing:</b> Updates coordinate curves at 60fps, shifting the break-even intersection point dynamically.", style_body),
+        Paragraph("• <b>Single-Click Baseline Reset:</b> Restores saved base parameters without page reloads.", style_body)
     ]
     s6_r = [
-        Paragraph("WHAT-IF SLIDERS & SCENARIO MATRICES", style_card_title_green),
-        Paragraph("• <b>Real-Time What-If Sliders:</b> Adjust Price, Var Cost, and Fixed Costs (-50% to +50%) with live variance indicators.", style_body),
-        Paragraph("• <b>Sensitivity Matrix:</b> Displays BE Volume shifts at -20%, -10%, 0%, +10%, +20% for each cost driver.", style_body),
-        Paragraph("• <b>Volume Scenario Analysis:</b> Evaluates Pessimistic (-25%), Base, and Optimistic (+25%) market conditions.", style_body),
-        Paragraph("• <b>Structural Loss Guard:</b> Raises instant alert if P ≤ V (selling below variable cost) with full loss shading.", style_body)
+        Paragraph("STRESS TESTING & REPORT GENERATION", style_card_title_green),
+        Paragraph("• <b>5-Tier Sensitivity Matrix:</b> Evaluates BE Volume shifts across -20%, -10%, 0%, +10%, and +20% cost driver changes.", style_body),
+        Paragraph("• <b>Volume Scenario Analysis:</b> Models Pessimistic (-25%), Base, and Optimistic (+25%) market outcomes.", style_body),
+        Paragraph("• <b>Executive Printable Report:</b> Dedicated @media print stylesheet for clean, publication-ready PDF exports.", style_body),
+        Paragraph("• <b>Decision Support Warnings:</b> Highlights when fixed costs exceed safe coverage thresholds.", style_body)
     ]
     story.append(Table([[make_card(s6_l), make_card(s6_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
     story.append(PageBreak())
 
-    # Slide 7: Results & Conclusion
+    # Slide 7: Results & Academic Conclusion
     story.append(Paragraph("CONCLUSION & IMPACT", style_cat))
     story.append(Paragraph("Project Results, Live Deployment & Academic Scope", style_title))
     s7_l = [
@@ -689,7 +753,7 @@ def create_pdf():
     story.append(Table([[make_card(s7_l), make_card(s7_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
 
     doc.build(story)
-    print(f"[OK] Enhanced PDF with screenshots generated at: {PDF_PATH}")
+    print(f"[OK] Enhanced PDF (7 slides with unified Frontend & Backend) generated at: {PDF_PATH}")
 
 
 if __name__ == "__main__":
