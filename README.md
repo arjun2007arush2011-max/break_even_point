@@ -70,6 +70,21 @@ Click the **"⚡ Quick Fill Demo Account"** button on the login screen, or enter
 
 ---
 
+## ⚡ Pre-Loaded Industry Templates (1-Click Demo)
+
+The platform includes 6 real-world industry templates accessible via 1-click preset buttons or dropdown:
+
+| Icon | Industry Template | Sample Firm | Unit Price | Variable Cost | Fixed Costs / Mo | Expected Volume |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: |
+| ☕ | **Artisan Coffee Shop & Bakery** | Velvet Bean Roastery | $5.50 / cup | $1.40 | $12,500 | 3,600 cups |
+| 💻 | **B2B Cloud SaaS Platform** | CloudMetrics Analytics | $149.00 / sub | $18.00 | $28,000 | 320 subs |
+| 👕 | **D2C Apparel E-Commerce** | Aura Urban Streetwear | $55.00 / order | $21.00 | $9,500 | 500 orders |
+| 🏭 | **Precision CNC Manufacturing** | TitanPrecision Forge | $340.00 / part | $155.00 | $42,000 | 380 parts |
+| 🩺 | **Dental & Health Clinic** | Horizon Dental Care | $175.00 / visit | $32.00 | $21,500 | 240 visits |
+| 🎨 | **Digital Creative Agency** | Apex Creative Labs | $2,800 / retainer | $750.00 | $16,000 | 12 retainers |
+
+---
+
 ## Backend REST API Endpoints
 
 All backend implementations provide identical RESTful API contracts:

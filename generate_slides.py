@@ -488,10 +488,10 @@ def create_pptx():
     h6_r.font.color.rgb = C_SUCCESS
 
     sims = [
+        ("Pre-Loaded Industry Presets:", "1-click templates for Cafe, SaaS, E-Commerce, Manufacturing, Clinic, and Agency."),
         ("5-Tier Sensitivity Matrix Table:", "Evaluates Required BE Units when each driver shifts by -20%, -10%, 0%, +10%, and +20%."),
         ("Volume Scenario Forecasting:", "Projects outcomes under Pessimistic (-25% volume), Expected Base, and Optimistic (+25% volume) market conditions."),
-        ("Executive Printable Report:", "Dedicated @media print layout produces clean, investor-ready PDF summaries with corporate letterheads."),
-        ("Decision Support Warnings:", "Alerts decision-makers when fixed costs exceed safe coverage thresholds.")
+        ("Executive Printable Report:", "Dedicated @media print layout with letterhead and scannable mobile QR code.")
     ]
     for title, desc in sims:
         p = tf6_r.add_paragraph()
@@ -815,10 +815,10 @@ def create_pdf():
     ]
     s6_r = [
         Paragraph("STRESS TESTING & REPORT GENERATION", style_card_title_green),
+        Paragraph("• <b>Pre-Loaded Industry Presets:</b> 1-click templates for Cafe, SaaS, E-Commerce, Manufacturing, Clinic, and Agency.", style_body),
         Paragraph("• <b>5-Tier Sensitivity Matrix:</b> Evaluates BE Volume shifts across -20%, -10%, 0%, +10%, and +20% cost driver changes.", style_body),
         Paragraph("• <b>Volume Scenario Analysis:</b> Models Pessimistic (-25%), Base, and Optimistic (+25%) market outcomes.", style_body),
-        Paragraph("• <b>Executive Printable Report:</b> Dedicated @media print stylesheet for clean, publication-ready PDF exports.", style_body),
-        Paragraph("• <b>Decision Support Warnings:</b> Highlights when fixed costs exceed safe coverage thresholds.", style_body)
+        Paragraph("• <b>Executive Printable Report:</b> Dedicated @media print stylesheet for clean, publication-ready PDF exports with QR code.", style_body)
     ]
     story.append(Table([[make_card(s6_l), make_card(s6_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
     story.append(PageBreak())

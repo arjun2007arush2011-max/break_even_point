@@ -258,6 +258,62 @@
       border-radius: var(--radius-sm);
     }
 
+    .btn-preset {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.28rem 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--primary-subtle);
+      transform: translateY(-1px);
+    }
+
+    .btn-preset.active {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .app-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text-main);
+      color: var(--bg-card);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .app-toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     /* Form Inputs */
     .form-group {
       margin-bottom: 1rem;
@@ -1046,12 +1102,21 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button class="btn btn-secondary btn-sm" onclick="App.loadSampleData()">
-            &#128161; Load Sample Business
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="App.resetInputs()">
-            &#10227; Reset Inputs
+        <div class="flex items-center gap-2" style="flex-wrap: wrap;">
+          <div class="control-item">
+            <label for="industry-preset-select" style="font-weight: 700; color: var(--primary);">&#128194; Industry Template:</label>
+            <select id="industry-preset-select" onchange="App.applyPreset(this.value)" style="border-color: var(--primary); font-weight: 600;">
+              <option value="" disabled selected>-- Choose Industry Preset --</option>
+              <option value="coffee">&#9749; Coffee Shop & Bakery</option>
+              <option value="saas">&#128187; B2B Cloud SaaS Platform</option>
+              <option value="ecommerce">&#128085; D2C Apparel E-Commerce</option>
+              <option value="manufacturing">&#127981; Precision CNC Manufacturing</option>
+              <option value="clinic">&#129658; Dental & Health Clinic</option>
+              <option value="agency">&#127912; Digital Creative Agency</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="App.resetInputs()" title="Reset to default baseline">
+            &#10227; Reset
           </button>
         </div>
       </div>
@@ -1070,6 +1135,21 @@
             <div class="card-header">
               <h2 class="card-title">&#9881; Cost & Sales Drivers</h2>
               <span id="sync-status-badge" class="badge badge-primary">Auto-Saved</span>
+            </div>
+
+            <!-- Quick Industry Presets Bar -->
+            <div class="preset-pills-bar no-print" style="margin-bottom: 1.15rem; padding: 10px 12px; background: var(--bg-body); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+              <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">
+                ⚡ 1-Click Industry Templates:
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="btn-preset" data-preset="coffee" onclick="App.applyPreset('coffee')">&#9749; Cafe</button>
+                <button type="button" class="btn-preset" data-preset="saas" onclick="App.applyPreset('saas')">&#128187; SaaS</button>
+                <button type="button" class="btn-preset" data-preset="ecommerce" onclick="App.applyPreset('ecommerce')">&#128085; E-Com</button>
+                <button type="button" class="btn-preset" data-preset="manufacturing" onclick="App.applyPreset('manufacturing')">&#127981; Manufacturing</button>
+                <button type="button" class="btn-preset" data-preset="clinic" onclick="App.applyPreset('clinic')">&#129658; Clinic</button>
+                <button type="button" class="btn-preset" data-preset="agency" onclick="App.applyPreset('agency')">&#127912; Agency</button>
+              </div>
             </div>
 
             <form id="inputs-form" onsubmit="event.preventDefault();">
@@ -2867,6 +2947,127 @@
 
 
     /* ==========================================================================
+       MODULE 8.5: PRE-LOADED INDUSTRY PRESETS CATALOG
+       ========================================================================== */
+    var IndustryPresets = {
+      coffee: {
+        id: 'coffee',
+        label: 'Artisan Coffee Shop & Bakery',
+        icon: '☕',
+        firmName: 'Velvet Bean Roastery',
+        ownerName: 'Elena Rostova',
+        businessType: 'Cafe / Specialty Food & Beverage',
+        phone: '(206) 555-0184',
+        email: 'elena@velvetbean.com',
+        address: 'Pike Place Market, Seattle, WA',
+        currency: '$',
+        unitLabel: 'cups',
+        fixedCosts: 12500,
+        price: 5.50,
+        variableCost: 1.40,
+        volume: 3600,
+        targetProfit: 4500,
+        description: 'Storefront lease, barista payroll, espresso equipment depreciation. Cost per cup includes specialty beans, organic milk, and cups.'
+      },
+      saas: {
+        id: 'saas',
+        label: 'B2B Cloud SaaS Platform',
+        icon: '💻',
+        firmName: 'CloudMetrics Analytics',
+        ownerName: 'Marcus Vance',
+        businessType: 'Software / Technology',
+        phone: '(415) 555-0192',
+        email: 'marcus@cloudmetrics.io',
+        address: '500 Howard St, San Francisco, CA',
+        currency: '$',
+        unitLabel: 'subscribers',
+        fixedCosts: 28000,
+        price: 149.00,
+        variableCost: 18.00,
+        volume: 320,
+        targetProfit: 15000,
+        description: 'Engineering salaries, baseline cloud infrastructure, office tools. Variable costs include per-seat cloud compute, payment processing, and messaging APIs.'
+      },
+      ecommerce: {
+        id: 'ecommerce',
+        label: 'D2C Apparel E-Commerce',
+        icon: '👕',
+        firmName: 'Aura Urban Streetwear',
+        ownerName: 'Maya Chen',
+        businessType: 'E-Commerce / Fashion & Apparel',
+        phone: '(312) 555-0147',
+        email: 'maya@aurastreetwear.com',
+        address: 'Wicker Park, Chicago, IL',
+        currency: '$',
+        unitLabel: 'orders',
+        fixedCosts: 9500,
+        price: 55.00,
+        variableCost: 21.00,
+        volume: 550,
+        targetProfit: 7500,
+        description: 'Fulfillment warehouse, Shopify apps, studio photography, marketing software. Variable costs include cut-and-sew garment, custom mailer box, and shipping carrier fees.'
+      },
+      manufacturing: {
+        id: 'manufacturing',
+        label: 'Precision CNC Manufacturing',
+        icon: '🏭',
+        firmName: 'TitanPrecision Forge',
+        ownerName: 'David K. Miller',
+        businessType: 'Manufacturing / Industrial Components',
+        phone: '(248) 555-0163',
+        email: 'dmiller@titanprecision.com',
+        address: 'Industrial Parkway, Detroit, MI',
+        currency: '$',
+        unitLabel: 'parts',
+        fixedCosts: 42000,
+        price: 340.00,
+        variableCost: 155.00,
+        volume: 380,
+        targetProfit: 25000,
+        description: 'Factory floor lease, CNC tooling wear, plant management payroll, 3-phase heavy power. Variable costs include aerospace alloy billets, tooling inserts, coolant, and crate freight.'
+      },
+      clinic: {
+        id: 'clinic',
+        label: 'Specialized Dental & Health Clinic',
+        icon: '🩺',
+        firmName: 'Horizon Dental Care',
+        ownerName: 'Dr. Sarah Patel, DDS',
+        businessType: 'Healthcare / Outpatient Services',
+        phone: '(512) 555-0178',
+        email: 'care@horizondental.com',
+        address: 'Medical Arts Plaza, Austin, TX',
+        currency: '$',
+        unitLabel: 'visits',
+        fixedCosts: 21500,
+        price: 175.00,
+        variableCost: 32.00,
+        volume: 240,
+        targetProfit: 12000,
+        description: 'Medical suite lease, dental chair leasing, hygienist & receptionist staff, malpractice insurance. Variable costs include sterile kits, composite resins, and lab fees.'
+      },
+      agency: {
+        id: 'agency',
+        label: 'Digital Design & Marketing Agency',
+        icon: '🎨',
+        firmName: 'Apex Creative Labs',
+        ownerName: 'Jordan Reed',
+        businessType: 'Professional Creative Services',
+        phone: '(212) 555-0139',
+        email: 'jordan@apexcreative.agency',
+        address: 'SoHo Design District, New York, NY',
+        currency: '$',
+        unitLabel: 'retainers',
+        fixedCosts: 16000,
+        price: 2800.00,
+        variableCost: 750.00,
+        volume: 12,
+        targetProfit: 8500,
+        description: 'Creative studio workspace, Adobe CC/Figma/3D licenses, project management, business insurance. Variable costs include specialist freelancer hours and stock footage licensing.'
+      }
+    };
+
+
+    /* ==========================================================================
        MODULE 9: MAIN APPLICATION CONTROLLER
        ========================================================================== */
     var App = {
@@ -2936,6 +3137,67 @@
         }
       },
 
+      applyPreset: function(key) {
+        var p = IndustryPresets[key];
+        if (!p) return;
+
+        // Highlight active pill
+        var pills = document.querySelectorAll('.btn-preset');
+        for (var i = 0; i < pills.length; i++) {
+          if (pills[i].getAttribute('data-preset') === key) {
+            pills[i].className = 'btn-preset active';
+          } else {
+            pills[i].className = 'btn-preset';
+          }
+        }
+
+        // Sync dropdown
+        var select = document.getElementById('industry-preset-select');
+        if (select) select.value = key;
+
+        // Populate cost & sales inputs
+        document.getElementById('inp-fixed-costs').value = p.fixedCosts;
+        document.getElementById('inp-price').value = p.price;
+        document.getElementById('inp-variable-cost').value = p.variableCost;
+        document.getElementById('inp-volume').value = p.volume;
+        document.getElementById('inp-target-profit').value = p.targetProfit;
+
+        // Populate currency & unit labels
+        document.getElementById('currency-select').value = p.currency;
+        document.getElementById('unit-label-input').value = p.unitLabel;
+
+        // Update profile
+        ProfileModule.load({
+          firm_name: p.firmName,
+          owner_name: p.ownerName,
+          business_type: p.businessType,
+          phone: p.phone,
+          email: p.email,
+          address: p.address
+        });
+
+        this.onCurrencyChange();
+        this.onUnitLabelChange();
+
+        this.showToast('✨ Loaded ' + p.label + ' template with realistic metrics!');
+      },
+
+      showToast: function(msg) {
+        var toast = document.getElementById('app-toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'app-toast';
+          toast.className = 'app-toast';
+          document.body.appendChild(toast);
+        }
+        toast.innerHTML = msg;
+        toast.className = 'app-toast visible';
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(function() {
+          toast.className = 'app-toast';
+        }, 3200);
+      },
+
       onCurrencyChange: function() {
         this.currentCurrency = document.getElementById('currency-select').value;
         var symbols = document.querySelectorAll('.curr-symbol');
@@ -2988,35 +3250,26 @@
       },
 
       loadSampleData: function() {
-        document.getElementById('inp-fixed-costs').value = 12500;
-        document.getElementById('inp-price').value = 6.50;
-        document.getElementById('inp-variable-cost').value = 2.10;
-        document.getElementById('inp-volume').value = 3800;
-        document.getElementById('inp-target-profit').value = 5000;
-
-        document.getElementById('currency-select').value = '$';
-        document.getElementById('unit-label-input').value = 'cups';
-
-        ProfileModule.load({
-          firm_name: 'Velvet Bean Roastery',
-          owner_name: 'Elena Rostova',
-          business_type: 'Restaurant / Food',
-          phone: '2065550184',
-          email: 'elena@velvetbean.com',
-          address: 'Pike Place Market, Seattle, WA'
-        });
-
-        this.onCurrencyChange();
-        this.onUnitLabelChange();
+        this.applyPreset('coffee');
       },
 
       resetInputs: function() {
+        var pills = document.querySelectorAll('.btn-preset');
+        for (var i = 0; i < pills.length; i++) {
+          pills[i].className = 'btn-preset';
+        }
+        var select = document.getElementById('industry-preset-select');
+        if (select) select.selectedIndex = 0;
+
         document.getElementById('inp-fixed-costs').value = 10000;
         document.getElementById('inp-price').value = 50;
         document.getElementById('inp-variable-cost').value = 20;
         document.getElementById('inp-volume').value = 500;
         document.getElementById('inp-target-profit').value = '';
+        document.getElementById('unit-label-input').value = 'units';
+        this.onUnitLabelChange();
         this.recalculateAndSave();
+        this.showToast('Reset inputs to default parameters.');
       },
 
       onInputChange: function() {
