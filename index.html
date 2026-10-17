@@ -964,6 +964,9 @@
           <button class="btn btn-secondary btn-sm" onclick="App.toggleTheme()" title="Toggle Dark/Light Mode">
             <span id="theme-icon">&#9790;</span>
           </button>
+          <button class="btn btn-outline btn-sm" onclick="App.openQrModal()" title="View Mobile QR Code">
+            &#128241; QR Code
+          </button>
           <button class="btn btn-outline btn-sm" onclick="window.print()" title="Print Clean Business Report">
             &#128424; Print Report
           </button>
@@ -989,9 +992,13 @@
               Phone: (206) 555-0184 | Email: elena@velvetbean.com | Seattle, WA
             </div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 14pt; font-weight: 800; color: #2563eb;">BREAK-EVEN FEASIBILITY REPORT</div>
-            <div id="print-date" style="font-size: 9pt; color: #64748b; margin-top: 4pt;">Generated: Oct 15, 2026</div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="text-align: right;">
+              <div style="font-size: 14pt; font-weight: 800; color: #2563eb;">BREAK-EVEN FEASIBILITY REPORT</div>
+              <div id="print-date" style="font-size: 9pt; color: #64748b; margin-top: 4pt;">Generated: Oct 15, 2026</div>
+              <div style="font-size: 8pt; color: #64748b; margin-top: 2pt;">Interactive Model: Scan QR &rarr;</div>
+            </div>
+            <img src="qrcode_live.png" alt="Scan for Live App" style="width: 58px; height: 58px; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; padding: 2px;">
           </div>
         </div>
       </div>
@@ -1402,6 +1409,31 @@
           <button type="submit" class="btn btn-primary">&#10003; Save Profile</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       SECTION 3B: MOBILE QR CODE MODAL
+       ========================================================================== -->
+  <div id="qr-modal" class="modal-backdrop hidden no-print" onclick="if(event.target===this) App.closeQrModal();">
+    <div class="modal-box" style="max-width: 400px; text-align: center; padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 class="card-title" style="margin: 0; font-size: 1.15rem;">&#128241; Mobile QR Code</h2>
+        <button class="btn btn-secondary btn-sm" onclick="App.closeQrModal()">&times;</button>
+      </div>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Scan this QR code with your smartphone camera to test the live simulator on mobile.
+      </p>
+      <div style="background: #ffffff; padding: 0.75rem; border-radius: 8px; display: inline-block; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-bottom: 1rem;">
+        <img src="qrcode_live.png" alt="Scan to Launch Live App" style="width: 220px; height: 220px; display: block;">
+      </div>
+      <div style="font-size: 0.8rem; word-break: break-all; color: var(--primary); font-weight: 600; margin-bottom: 1.25rem;">
+        https://arjun2007arush2011-max.github.io/break_even_point/
+      </div>
+      <div style="display: flex; gap: 0.5rem; justify-content: center;">
+        <button class="btn btn-primary btn-sm" onclick="App.copyLiveUrl()">&#128203; Copy Link</button>
+        <button class="btn btn-secondary btn-sm" onclick="App.closeQrModal()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -2874,6 +2906,33 @@
         var icon = document.getElementById('theme-icon');
         if (icon) {
           icon.innerHTML = theme === 'dark' ? '&#9788;' : '&#9790;';
+        }
+      },
+
+      openQrModal: function() {
+        var modal = document.getElementById('qr-modal');
+        if (modal) modal.className = 'modal-backdrop no-print';
+      },
+
+      closeQrModal: function() {
+        var modal = document.getElementById('qr-modal');
+        if (modal) modal.className = 'modal-backdrop hidden no-print';
+      },
+
+      copyLiveUrl: function() {
+        var url = 'https://arjun2007arush2011-max.github.io/break_even_point/';
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function() {
+            alert('Live app URL copied to clipboard: ' + url);
+          });
+        } else {
+          var temp = document.createElement('input');
+          temp.value = url;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+          alert('Live app URL copied to clipboard: ' + url);
         }
       },
 

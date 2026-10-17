@@ -3,6 +3,7 @@
 Generates PowerPoint (PPTX) and PDF presentation slides for the College Mini-Project:
 Break-Even Point Predictor & Feasibility Engine.
 Features:
+- Scannable QR Codes on Title and Conclusion slides for instant mobile live demo testing.
 - Unified Full-Stack Architecture slide displaying both Frontend and Backend together on the SAME slide.
 - Embedded live screenshots.
 - Exactly 7 slides covering the full academic project lifecycle.
@@ -34,6 +35,8 @@ PDF_PATH = os.path.join(BASE_DIR, "Break-Even-Project-Presentation.pdf")
 SCREENSHOT_DASH = os.path.join(BASE_DIR, "screenshot_dashboard.png")
 SCREENSHOT_LOGIN = os.path.join(BASE_DIR, "screenshot_login.png")
 SCREENSHOT_CHART = os.path.join(BASE_DIR, "screenshot_chart.png")
+QR_LIVE = os.path.join(BASE_DIR, "qrcode_live.png")
+QR_GITHUB = os.path.join(BASE_DIR, "qrcode_github.png")
 
 # Color Palette
 C_PRIMARY = RGBColor(37, 99, 235)      # #2563eb Blue
@@ -46,7 +49,7 @@ C_ACCENT = RGBColor(124, 58, 237)      # #7c3aed Purple
 C_WHITE = RGBColor(255, 255, 255)
 
 # ==============================================================================
-# 1. PPTX GENERATION (7 SLIDES WITH FRONTEND & BACKEND ON SAME SLIDE)
+# 1. PPTX GENERATION (7 SLIDES WITH FRONTEND & BACKEND ON SAME SLIDE & QR CODES)
 # ==============================================================================
 def create_pptx():
     prs = Presentation()
@@ -82,7 +85,7 @@ def create_pptx():
         return shape
 
     # --------------------------------------------------------------------------
-    # SLIDE 1: Title & Project Overview (With Live Preview)
+    # SLIDE 1: Title & Project Overview (With Live Preview & QR Code)
     # --------------------------------------------------------------------------
     slide1 = prs.slides.add_slide(blank_layout)
     add_card(slide1, Inches(0.8), Inches(0.8), Inches(11.733), Inches(5.9), C_LIGHT_BG, C_PRIMARY)
@@ -110,32 +113,58 @@ def create_pptx():
     p2.font.color.rgb = C_MUTED
     p2.space_before = Pt(4)
 
-    m_card = add_card(slide1, Inches(1.2), Inches(3.6), Inches(5.8), Inches(2.7), C_WHITE)
+    # Metadata card (Left)
+    m_card = add_card(slide1, Inches(1.2), Inches(3.6), Inches(4.3), Inches(2.7), C_WHITE)
     tf_m = m_card.text_frame
     tf_m.word_wrap = True
-    tf_m.margin_left = Inches(0.25)
-    tf_m.margin_top = Inches(0.2)
+    tf_m.margin_left = Inches(0.2)
+    tf_m.margin_top = Inches(0.18)
 
     p_h = tf_m.paragraphs[0]
     p_h.text = "PROJECT SPECIFICATIONS"
-    p_h.font.size = Pt(11)
+    p_h.font.size = Pt(10.5)
     p_h.font.bold = True
     p_h.font.color.rgb = C_PRIMARY
 
     meta = [
-        ("Student / Developer:", "arjun2007arush2011-max"),
-        ("Live Web Application:", "https://arjun2007arush2011-max.github.io/break_even_point/"),
-        ("GitHub Repository:", "https://github.com/arjun2007arush2011-max/break_even_point"),
-        ("Domain:", "FinTech & Decision Support Systems"),
-        ("Architecture:", "Client-Side Zero-Dependency + REST Backends")
+        ("Developer:", "arjun2007arush2011-max"),
+        ("Domain:", "FinTech & Decision Systems"),
+        ("Architecture:", "Client Vanilla ES5 + REST"),
+        ("Backends:", "Python 3 / Ruby / Node.js"),
+        ("Database:", "SQLite3 + LocalStorage"),
+        ("Live Web App:", "GitHub Pages Hosted")
     ]
     for k, v in meta:
         p = tf_m.add_paragraph()
         p.text = f"{k} {v}"
-        p.font.size = Pt(10)
+        p.font.size = Pt(9)
         p.font.color.rgb = C_DARK
-        p.space_before = Pt(3)
+        p.space_before = Pt(2.5)
 
+    # QR Code Card on Slide 1
+    qr_card1 = add_card(slide1, Inches(5.65), Inches(3.6), Inches(1.4), Inches(2.7), C_WHITE)
+    tf_qr1 = qr_card1.text_frame
+    tf_qr1.word_wrap = True
+    tf_qr1.margin_left = Inches(0.08)
+    tf_qr1.margin_top = Inches(0.12)
+    p_qrt = tf_qr1.paragraphs[0]
+    p_qrt.text = "SCAN LIVE"
+    p_qrt.font.size = Pt(9)
+    p_qrt.font.bold = True
+    p_qrt.font.color.rgb = C_PRIMARY
+    p_qrt.alignment = PP_ALIGN.CENTER
+
+    if os.path.exists(QR_LIVE):
+        slide1.shapes.add_picture(QR_LIVE, Inches(5.75), Inches(3.95), Inches(1.2), Inches(1.2))
+
+    p_qru = tf_qr1.add_paragraph()
+    p_qru.text = "Test on Phone"
+    p_qru.font.size = Pt(7.5)
+    p_qru.font.color.rgb = C_MUTED
+    p_qru.alignment = PP_ALIGN.CENTER
+    p_qru.space_before = Pt(92)
+
+    # Right side: Screenshot of the live app
     if os.path.exists(SCREENSHOT_DASH):
         slide1.shapes.add_picture(SCREENSHOT_DASH, Inches(7.3), Inches(1.4), Inches(4.8), Inches(4.8))
 
@@ -479,25 +508,26 @@ def create_pptx():
         p_b.space_before = Pt(1)
 
     # --------------------------------------------------------------------------
-    # SLIDE 7: Results, Deployment & Academic Conclusion
+    # SLIDE 7: Results, Deployment & Academic Conclusion (With Scannable QR Code!)
     # --------------------------------------------------------------------------
     slide7 = prs.slides.add_slide(blank_layout)
     add_header(slide7, "Project Results, Live Deployment & Conclusion", "CONCLUSION & IMPACT")
 
-    c7_l = add_card(slide7, Inches(0.8), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
+    # Left: Outcomes (width 4.5 in)
+    c7_l = add_card(slide7, Inches(0.8), Inches(1.6), Inches(4.5), Inches(5.1), C_WHITE)
     tf7_l = c7_l.text_frame
     tf7_l.word_wrap = True
-    tf7_l.margin_left = Inches(0.3)
-    tf7_l.margin_top = Inches(0.3)
+    tf7_l.margin_left = Inches(0.25)
+    tf7_l.margin_top = Inches(0.25)
 
     h7_l = tf7_l.paragraphs[0]
     h7_l.text = "KEY DELIVERABLES & OUTCOMES"
-    h7_l.font.size = Pt(12)
+    h7_l.font.size = Pt(11)
     h7_l.font.bold = True
     h7_l.font.color.rgb = C_PRIMARY
 
     outcomes = [
-        "Live Production Deployment: Successfully deployed and hosted globally on GitHub Pages at https://arjun2007arush2011-max.github.io/break_even_point/",
+        "Live Production Deployment: Successfully deployed globally on GitHub Pages at https://arjun2007arush2011-max.github.io/break_even_point/",
         "Zero Third-Party Dependencies: Operates entirely standalone in any browser with zero node_modules or CDN downloads.",
         "High Performance: Sub-millisecond mathematical recalculation with smooth 60fps SVG rendering.",
         "Clean Print Reports: Built-in @media print executive feasibility report for stakeholders and investors.",
@@ -506,48 +536,101 @@ def create_pptx():
     for o in outcomes:
         p = tf7_l.add_paragraph()
         p.text = f"✔ {o}"
-        p.font.size = Pt(10.5)
+        p.font.size = Pt(9.5)
         p.font.color.rgb = C_DARK
-        p.space_before = Pt(7)
+        p.space_before = Pt(6)
 
-    c7_r = add_card(slide7, Inches(6.9), Inches(1.6), Inches(5.6), Inches(5.1), C_WHITE)
-    tf7_r = c7_r.text_frame
-    tf7_r.word_wrap = True
-    tf7_r.margin_left = Inches(0.3)
-    tf7_r.margin_top = Inches(0.3)
+    # Middle: Academic Impact (width 4.5 in)
+    c7_m = add_card(slide7, Inches(5.5), Inches(1.6), Inches(4.5), Inches(5.1), C_WHITE)
+    tf7_m = c7_m.text_frame
+    tf7_m.word_wrap = True
+    tf7_m.margin_left = Inches(0.25)
+    tf7_m.margin_top = Inches(0.25)
 
-    h7_r = tf7_r.paragraphs[0]
-    h7_r.text = "ACADEMIC IMPACT & FUTURE SCOPE"
-    h7_r.font.size = Pt(12)
-    h7_r.font.bold = True
-    h7_r.font.color.rgb = C_SUCCESS
+    h7_m = tf7_m.paragraphs[0]
+    h7_m.text = "ACADEMIC IMPACT & FUTURE SCOPE"
+    h7_m.font.size = Pt(11)
+    h7_m.font.bold = True
+    h7_m.font.color.rgb = C_SUCCESS
 
     academic = [
         ("Cross-Disciplinary Learning:", "Combines financial accounting, web engineering, database architecture, and computer graphics algorithms."),
         ("Multi-Product Inventory Mix:", "Future scope to support multi-item catalog weighting for complex retail operations."),
         ("Monte Carlo Stochastic Modeling:", "Adding probability distribution curves to model demand uncertainty."),
-        ("Live Demonstration URL:", "https://arjun2007arush2011-max.github.io/break_even_point/")
+        ("Open-Source Codebase:", "Complete source code, multi-runtime backends, and documentation publicly available.")
     ]
     for title, desc in academic:
-        p = tf7_r.add_paragraph()
+        p = tf7_m.add_paragraph()
         p.text = title
-        p.font.size = Pt(10.5)
+        p.font.size = Pt(9.5)
         p.font.bold = True
         p.font.color.rgb = C_DARK
         p.space_before = Pt(6)
 
-        p_b = tf7_r.add_paragraph()
+        p_b = tf7_m.add_paragraph()
         p_b.text = f"  {desc}"
-        p_b.font.size = Pt(9.5)
+        p_b.font.size = Pt(8.5)
         p_b.font.color.rgb = C_MUTED
         p_b.space_before = Pt(1)
 
+    # Right: Live Demo QR Code Box (width 2.3 in)
+    c7_qr = add_card(slide7, Inches(10.2), Inches(1.6), Inches(2.3), Inches(5.1), C_LIGHT_BG, C_PRIMARY)
+    tf7_qr = c7_qr.text_frame
+    tf7_qr.word_wrap = True
+    tf7_qr.margin_left = Inches(0.12)
+    tf7_qr.margin_top = Inches(0.18)
+
+    h7_qr = tf7_qr.paragraphs[0]
+    h7_qr.text = "TEST LIVE DEMO"
+    h7_qr.font.size = Pt(11)
+    h7_qr.font.bold = True
+    h7_qr.font.color.rgb = C_PRIMARY
+    h7_qr.alignment = PP_ALIGN.CENTER
+
+    p_sub = tf7_qr.add_paragraph()
+    p_sub.text = "Scan with your phone:"
+    p_sub.font.size = Pt(8)
+    p_sub.font.color.rgb = C_MUTED
+    p_sub.alignment = PP_ALIGN.CENTER
+    p_sub.space_before = Pt(2)
+
+    if os.path.exists(QR_LIVE):
+        slide7.shapes.add_picture(QR_LIVE, Inches(10.45), Inches(2.35), Inches(1.8), Inches(1.8))
+
+    p_url = tf7_qr.add_paragraph()
+    p_url.text = "Live Web App"
+    p_url.font.size = Pt(9.5)
+    p_url.font.bold = True
+    p_url.font.color.rgb = C_DARK
+    p_url.alignment = PP_ALIGN.CENTER
+    p_url.space_before = Pt(140)
+
+    p_url2 = tf7_qr.add_paragraph()
+    p_url2.text = "github.io/break_even_point"
+    p_url2.font.size = Pt(7.5)
+    p_url2.font.color.rgb = C_PRIMARY
+    p_url2.alignment = PP_ALIGN.CENTER
+
+    p_rep = tf7_qr.add_paragraph()
+    p_rep.text = "GitHub Repository:"
+    p_rep.font.size = Pt(8)
+    p_rep.font.color.rgb = C_MUTED
+    p_rep.alignment = PP_ALIGN.CENTER
+    p_rep.space_before = Pt(8)
+
+    p_rep2 = tf7_qr.add_paragraph()
+    p_rep2.text = "arjun2007arush2011-max\n/break_even_point"
+    p_rep2.font.size = Pt(7.5)
+    p_rep2.font.bold = True
+    p_rep2.font.color.rgb = C_DARK
+    p_rep2.alignment = PP_ALIGN.CENTER
+
     prs.save(PPTX_PATH)
-    print(f"[OK] Enhanced PowerPoint (7 slides with unified Frontend & Backend) generated at: {PPTX_PATH}")
+    print(f"[OK] Enhanced PowerPoint with QR codes generated at: {PPTX_PATH}")
 
 
 # ==============================================================================
-# 2. PDF PRESENTATION GENERATION (MATCHING 7-SLIDE DECK)
+# 2. PDF PRESENTATION GENERATION (MATCHING 7-SLIDE DECK WITH QR CODES)
 # ==============================================================================
 def create_pdf():
     doc = SimpleDocTemplate(
@@ -601,21 +684,29 @@ def create_pdf():
 
     story = []
 
-    # Slide 1: Title & Overview (with Dashboard Screenshot)
+    # Slide 1: Title & Overview (with Dashboard Screenshot & QR Code)
     story.append(Paragraph("COLLEGE MINI PROJECT PRESENTATION", style_cat))
     story.append(Paragraph("Break-Even Point Predictor & Feasibility Engine", style_title))
     
-    s1_left = [
+    s1_left_meta = [
         Paragraph("PROJECT METADATA", style_card_title),
-        Paragraph("<b>Domain:</b> FinTech / Financial Engineering & Web Systems", style_body),
+        Paragraph("<b>Domain:</b> FinTech / Decision Support Systems", style_body),
         Paragraph("<b>Developer:</b> arjun2007arush2011-max", style_body),
-        Paragraph("<b>Architecture:</b> Zero-Dependency Vanilla ES5 + Multi-Runtime REST", style_body),
-        Paragraph("<b>Database:</b> SQLite3 Relational DB + LocalStorage Fallback", style_body),
+        Paragraph("<b>Architecture:</b> Zero-Dependency Vanilla ES5 + REST", style_body),
+        Paragraph("<b>Database:</b> SQLite3 + LocalStorage Fallback", style_body),
         Paragraph("<b>Live URL:</b> <font color='#2563eb'><u>https://arjun2007arush2011-max.github.io/break_even_point/</u></font>", style_body),
         Paragraph("<b>GitHub:</b> <font color='#2563eb'><u>https://github.com/arjun2007arush2011-max/break_even_point</u></font>", style_body)
     ]
+    qr_img1 = RLImage(QR_LIVE, width=65, height=65) if os.path.exists(QR_LIVE) else Paragraph("QR", style_body)
+    s1_qr_box = [
+        Paragraph("<b>SCAN FOR LIVE DEMO</b>", style_card_title),
+        qr_img1,
+        Paragraph("<font size='7' color='#64748b'>Point camera to test on phone</font>", style_body)
+    ]
+    s1_meta_table = Table([[make_card(s1_left_meta, width=235), make_card(s1_qr_box, width=100, bg_color='#f8fafc', border_color='#2563eb')]], colWidths=[245, 110], style=[('VALIGN', (0,0), (-1,-1), 'TOP')])
+
     img1 = RLImage(SCREENSHOT_DASH, width=350, height=270) if os.path.exists(SCREENSHOT_DASH) else Paragraph("Screenshot", style_body)
-    story.append(Table([[make_card(s1_left, width=340), img1]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
+    story.append(Table([[s1_meta_table, img1]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'MIDDLE')]))
     story.append(PageBreak())
 
     # Slide 2: Problem Statement & Objectives
@@ -698,8 +789,8 @@ def create_pdf():
         Paragraph("• <b>Break-Even Volume:</b> Q_BE = Fixed Costs (F) / (P - V)", style_body),
         Paragraph("• <b>Break-Even Revenue:</b> R_BE = Q_BE × P = F / CM%", style_body),
         Paragraph("• <b>Net Operating Profit:</b> Profit = Q × (P - V) - F", style_body),
-        Paragraph("• <b>Margin of Safety (MOS):</b> MOS = (Q - Q_BE) / Q × 100%", style_body),
-        Paragraph("• <b>Operating Leverage (DOL):</b> DOL = (Q × CM) / Profit", style_body),
+        Paragraph("• <b>Margin of Safety:</b> MOS = (Q - Q_BE) / Q × 100%", style_body),
+        Paragraph("• <b>Operating Leverage:</b> DOL = (Q × CM) / Profit", style_body),
         Paragraph("• <b>Target Profit Units:</b> Q_Target = (F + Target) / CM", style_body)
     ]
     s5_r = [
@@ -732,7 +823,7 @@ def create_pdf():
     story.append(Table([[make_card(s6_l), make_card(s6_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
     story.append(PageBreak())
 
-    # Slide 7: Results & Academic Conclusion
+    # Slide 7: Results & Academic Conclusion (With QR Code Box)
     story.append(Paragraph("CONCLUSION & IMPACT", style_cat))
     story.append(Paragraph("Project Results, Live Deployment & Academic Scope", style_title))
     s7_l = [
@@ -744,16 +835,24 @@ def create_pdf():
         Paragraph("✔ <b>SEO Optimization:</b> Integrated robots.txt, sitemap.xml, and OpenGraph social metadata.", style_body)
     ]
     s7_r = [
-        Paragraph("ACADEMIC IMPACT & FUTURE SCOPE", style_card_title_green),
+        Paragraph("ACADEMIC IMPACT & SCOPE", style_card_title_green),
         Paragraph("• <b>Cross-Disciplinary Integration:</b> Merges software engineering, managerial cost accounting, database design, and interactive computer graphics.", style_body),
         Paragraph("• <b>Multi-Product Sales Mix:</b> Future expansion to calculate weighted average contribution margins for multi-item inventory catalogs.", style_body),
-        Paragraph("• <b>Monte Carlo Risk Modeling:</b> Simulating demand curve fluctuations and price elasticity for probabilistic risk assessment.", style_body),
-        Paragraph("• <b>GitHub Repository:</b> <font color='#2563eb'><u>https://github.com/arjun2007arush2011-max/break_even_point</u></font>", style_body)
+        Paragraph("• <b>Monte Carlo Risk Modeling:</b> Simulating demand curve fluctuations and price elasticity for probabilistic risk assessment.", style_body)
     ]
-    story.append(Table([[make_card(s7_l), make_card(s7_r)]], colWidths=[360, 360], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
+    qr_img7 = RLImage(QR_LIVE, width=95, height=95) if os.path.exists(QR_LIVE) else Paragraph("QR", style_body)
+    s7_qr = [
+        Paragraph("<b>TEST LIVE APP</b>", style_card_title),
+        qr_img7,
+        Paragraph("<font size='7.5' color='#2563eb'><b>Scan with Phone Camera</b></font>", style_body),
+        Paragraph("<font size='6.5' color='#64748b'>Instant Mobile Live Demo</font>", style_body)
+    ]
+    story.append(Table([
+        [make_card(s7_l, width=285), make_card(s7_r, width=270), make_card(s7_qr, width=130, bg_color='#f8fafc', border_color='#2563eb')]
+    ], colWidths=[295, 280, 145], style=[('VALIGN', (0,0), (-1,-1), 'TOP')]))
 
     doc.build(story)
-    print(f"[OK] Enhanced PDF (7 slides with unified Frontend & Backend) generated at: {PDF_PATH}")
+    print(f"[OK] Enhanced PDF with QR codes generated at: {PDF_PATH}")
 
 
 if __name__ == "__main__":

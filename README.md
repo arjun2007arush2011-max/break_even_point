@@ -2,7 +2,15 @@
 
 A full-stack, standalone financial forecasting platform designed to calculate break-even volume, profitability thresholds, margin of safety, and operational sensitivity with real-time what-if simulations and inline SVG charts.
 
+
 ---
+
+## 📱 Live Web Application & Mobile QR Code
+
+| **Live Website & Presentation** | **Scan with Mobile Camera** |
+| :--- | :---: |
+| 🌐 **Live Web Application:** [https://arjun2007arush2011-max.github.io/break_even_point/](https://arjun2007arush2011-max.github.io/break_even_point/)<br><br>📊 **Presentation Slides (PPTX):** [Break-Even-Project-Presentation.pptx](Break-Even-Project-Presentation.pptx)<br>📄 **Presentation Document (PDF):** [Break-Even-Project-Presentation.pdf](Break-Even-Project-Presentation.pdf)<br><br>• Hosted live on GitHub Pages with global SSL/HTTPS.<br>• Full financial simulator, interactive SVG charts, and sensitivity sliders.<br>• Unified Full-Stack Architecture & zero external dependencies. | <a href="https://arjun2007arush2011-max.github.io/break_even_point/"><img src="qrcode_live.png" alt="Scan to Launch Live App" width="160" height="160"></a><br><sub><i>Point camera to launch on phone</i></sub> |
+
 
 ## Architecture Overview
 
